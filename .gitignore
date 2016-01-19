@@ -4,3 +4,5 @@ GlimmaJS.sublime-project
 GlimmaJS.sublime-workspace
 Gruntfile.js
 node_modules
+
+rebuild.sh
