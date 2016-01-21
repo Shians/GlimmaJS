@@ -6,3 +6,4 @@ window.bootstrap = require("bootstrap");
 require("./init/index");
 require("./helper/index");
 require("./chart/index");
+require("./layout/index");
