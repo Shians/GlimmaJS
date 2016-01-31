@@ -1,3 +1,6 @@
+/**
+ * @return {Object}
+ */
 glimma.chart.scatterChart = function() {
 	var margin = {top: 20, right: 20, bottom: 50, left: 60},
 		width = 500,
@@ -23,11 +26,16 @@ glimma.chart.scatterChart = function() {
 		container,
 		front,
 		data,
-		extent;
+		extent,
+		xOrd,
+		yOrd;
 
 	function chart(selection) {
 		var svg,
 			brush;
+
+		xOrd = typeof xScale.rangeBands === "function";
+		yOrd = typeof yScale.rangeBands === "function";
 
 		occupyContainer();
 		assignData();
@@ -37,7 +45,9 @@ glimma.chart.scatterChart = function() {
 		createBrush();
 		bindData();
 		drawSkeleton();
-		drawBrush();
+		if (!xOrd && !yOrd) {
+			drawBrush();
+		}
 		drawPoints();
 		drawAxis();
 		bindDispatcher();
@@ -56,6 +66,14 @@ glimma.chart.scatterChart = function() {
 			// Scale initialisation
 			xScale.domain(extent.x).range([0, width - margin.left - margin.right]);
 			yScale.domain(extent.y).range([height - margin.top - margin.bottom, 0]);
+			if (xOrd) {
+				xScale.domain(data.map(xValue).unique())
+					.rangePoints([0, width - margin.left - margin.right], 1);
+			}
+			if (yOrd) {
+				yScale.domain(data.map(yValue).unique())
+					.rangePoints([height - margin.top - margin.bottom, 0], 1);
+			}
 			if (cScale.domain() == []) {
 				cScale.domain(data.map(function (d) { return cValue(d); }).unique()); //TODO: Allow fill with cValue without mapping
 			}
@@ -123,8 +141,8 @@ glimma.chart.scatterChart = function() {
 				container.append("div").attr("class", "tooltip").style("opacity", 0); // tooltip
 			} 
 			// Update the inner dimensions.
-			var g = svg.select("g")
-					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			svg.select("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 			// Update the outer dimensions.
 			svg.attr("width", width)
 				.attr("height", height);
@@ -285,7 +303,7 @@ glimma.chart.scatterChart = function() {
 
 	chart.tooltip = function(_) {
 		if (!arguments.length) return tooltip;
-		tooltip = _;
+		tooltip = typeof _ === "string" ? [_] : _;
 		return chart;
 	};
 
@@ -320,6 +338,30 @@ glimma.chart.scatterChart = function() {
 		if (+_ % 1 === 0) {
 			ndigits = _;
 		}
+		return chart;
+	};
+
+	chart.xIsOrdinal = function() {
+		xScale = d3.scale.ordinal();
+		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0);
+		return chart;
+	};
+
+	chart.yIsOrdinal = function() {
+		yScale = d3.scale.ordinal();
+		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
+		return chart;
+	};
+
+	chart.xIsLinear = function() {
+		xScale = d3.scale.linear();
+		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0);
+		return chart;
+	};
+
+	chart.yIsLinear = function() {
+		yScale = d3.scale.linear();
+		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
 		return chart;
 	};
 
@@ -437,14 +479,14 @@ glimma.chart.scatterChart = function() {
 
 	//* Public Interactions *//
 	chart.hover = function(data) {
-		if (_withinExtent(data, extent)) {
+		if (_withinExtent(data, extent) || xOrd || yOrd) {
 			_highlight(data);
 			_showTooltip(data);	
 		}
 	};
 
 	chart.leave = function(data) {
-		if (_withinExtent(data, extent)) {
+		if (_withinExtent(data, extent) || xOrd || yOrd) {
 			_hideTooltip();
 			_lowlight();	
 		}

@@ -1,3 +1,7 @@
+/**
+ * Function to create a svg barplot with highlighting on mouseover
+ * @return {Object}
+ */
 glimma.chart.barChart = function() {
 	var margin = {top: 50, right: 20, bottom: 50, left: 60},
 		width = 500,
@@ -78,7 +82,7 @@ glimma.chart.barChart = function() {
 			gEnter.append("g").attr("class", "bar-container"); // bar container
 			front = gEnter.append("g").attr("class", "front"); // front layer
 			if (container.select(".tooltip").node() === null) {
-				container.append("div").attr("class", "tooltip padded rounded").style("opacity", 0); // tooltip
+				container.append("div").attr("class", "tooltip padded").style("opacity", 0); // tooltip
 			}
 			// Update the inner dimensions.
 			var g = svg.select("g")
