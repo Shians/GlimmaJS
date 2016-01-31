@@ -1,6 +1,9 @@
 window.glimma = {
-	chartData: [],
-	chartInfo: [],
-	charts: [],
-	linkage: []	
+	storage: {
+		chartData: [],
+		chartInfo: [],
+		charts: [],
+		linkage: []		
+	}
 };
+
