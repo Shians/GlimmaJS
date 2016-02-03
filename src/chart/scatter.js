@@ -10,8 +10,9 @@ glimma.chart.scatterChart = function() {
 		xValue = function (d) { return d.x; },
 		yValue = function (d) { return d.y; },
 		idValue = function (d) { return d.id; },
-		sizeValue = function (d) { return 2; },
-		cValue = function (d) { return "black"; },
+		idMap = function (d) { return d; },
+		sizeValue = function (d) { return 2; }, //TODO: Maybe add size scale?
+		cValue = function (d) { return "black"; }, //TODO: Hex colour values
 		tooltip = ["x", "y"],
 		titleValue = "",
 		xLabel = "",
@@ -284,8 +285,14 @@ glimma.chart.scatterChart = function() {
 	};
 
 	chart.id = function(_) {
-		if (!arguments.length) return id;
-		id = _;
+		if (!arguments.length) return idValue;
+		idValue = _;
+		return chart;
+	};
+
+	chart.idMap = function(_) {
+		if (!arguments.length) return idMap;
+		idMap = _;
 		return chart;
 	};
 
@@ -489,6 +496,18 @@ glimma.chart.scatterChart = function() {
 		if (_withinExtent(data, extent) || xOrd || yOrd) {
 			_hideTooltip();
 			_lowlight();	
+		}
+	};
+
+	chart.highlightById = function(id) {
+		var selectedData = data.filter(function (d) {
+			return (idMap(idValue(d)) === id);
+		});
+
+		if (selectedData.length !== 0) {
+			chart.hover(selectedData[0]);
+		} else {
+			console.log("Not found");
 		}
 	};
 

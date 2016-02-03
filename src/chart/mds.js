@@ -1,7 +1,8 @@
 glimma.chart.mdsChart = function() {
-	var chart = scatterChart();
+	var dimsChart = glimma.chart.scatterChart(),
+		eigenChart = glimma.chart.barChart;
 
-	chart._swapDim = function (dim1, dim2) {
+	dimsChart._swapDim = function (dim1, dim2) {
 		chart.x(function (d) { return d[["dim" + dim1]]; });
     	chart.y(function (d) { return d[["dim" + dim2]]; });
 
@@ -9,6 +10,14 @@ glimma.chart.mdsChart = function() {
     	chart.ylab("Dimension " + dim2);
     	chart.update();
 	};
-	
+
+	var container,
+		front,
+		data;
+
+	function chart(selection) {
+		var dispatcher = d3.dispatch("hover", "leave", "click");
+	}
+
 	return chart;
 };
