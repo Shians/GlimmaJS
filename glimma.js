@@ -37119,6 +37119,7 @@ glimma.chart.scatterChart = function() {
 		xValue = function (d) { return d.x; },
 		yValue = function (d) { return d.y; },
 		idValue = function (d) { return d.id; },
+		idMap = function (d) { return d; },
 		sizeValue = function (d) { return 2; },
 		cValue = function (d) { return "black"; },
 		tooltip = ["x", "y"],
@@ -37393,8 +37394,14 @@ glimma.chart.scatterChart = function() {
 	};
 
 	chart.id = function(_) {
-		if (!arguments.length) return id;
-		id = _;
+		if (!arguments.length) return idValue;
+		idValue = _;
+		return chart;
+	};
+
+	chart.idMap = function(_) {
+		if (!arguments.length) return idMap;
+		idMap = _;
 		return chart;
 	};
 
@@ -37601,6 +37608,18 @@ glimma.chart.scatterChart = function() {
 		}
 	};
 
+	chart.highlightById = function(id) {
+		var selectedData = data.filter(function (d) {
+			return (idMap(idValue(d)) === id);
+		});
+
+		if (selectedData.length !== 0) {
+			chart.hover(selectedData[0]);
+		} else {
+			console.log("Not found");
+		}
+	};
+
 	chart.rescale = function(extent) {
 		_rescale(extent);
 	};
@@ -37677,7 +37696,7 @@ require("./init/index");
 require("./helper/index");
 require("./chart/index");
 require("./layout/index");
-},{"./chart/index":19,"./helper/index":22,"./init/index":27,"./layout/index":31,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],26:[function(require,module,exports){
+},{"./chart/index":19,"./helper/index":22,"./init/index":27,"./layout/index":32,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],26:[function(require,module,exports){
 window.glimma = {
 	storage: {
 		chartData: [],
@@ -37757,12 +37776,61 @@ glimma.init.processLinkages = function () {
 };
 
 },{}],31:[function(require,module,exports){
+/**
+ * Create an input button with 
+ * @return {Object}
+ */
+glimma.layout.addAutoInput = function(selection, options) {
+	var row = glimma.layout.bsAddRow(selection);
+	// var col = glimma.layout.bsAddCol(row, 12);
+
+	function addButton(selection, options) {
+		var input = selection.append("input");
+		var button = selection.append("button");
+
+		button.html("Search");
+
+		$(input.node()).keyup(function (event) {
+			if (event.keyCode == 13) {
+			    $(button.node()).click();
+			}
+		});
+
+		button.actionCount = 0;
+		button.addAction = function(action) {
+			var wrapper = function () {
+				action(input.node().value);
+			};
+
+			this.actionCount += 1;
+			this.on("click.chart" + this.actionCount, wrapper);
+			return button;
+		};
+
+		button.updateOptions = function(options) {
+			$(input.node()).autocomplete({
+				source: options,
+				minLength: 2,
+				delay: 50
+			});
+			return button;
+		};
+
+		button.updateOptions(options);
+
+		return button;
+	}
+
+	return addButton(row, options);
+};
+},{}],32:[function(require,module,exports){
 require("./layout");
 
 require("./utilities");
-},{"./layout":32,"./utilities":33}],32:[function(require,module,exports){
+require("./autoinput");
+},{"./autoinput":31,"./layout":33,"./utilities":34}],33:[function(require,module,exports){
 glimma.layout = {};
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 //* REQUIRES BOOTSTRAP.JS LIBRARY *//
 /**
  * @param  {selection} selection d3 selection to add row to.
