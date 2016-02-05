@@ -2,9 +2,10 @@
  * Create an input button with 
  * @return {Object}
  */
-glimma.layout.addAutoInput = function(selection, options) {
+glimma.layout.addAutoInput = function(selection, options, float) {
+	float = typeof float !== "undefined" ? float : "left";
+
 	var row = glimma.layout.bsAddRow(selection);
-	// var col = glimma.layout.bsAddCol(row, 12);
 
 	function addButton(selection, options) {
 		var input = selection.append("input");

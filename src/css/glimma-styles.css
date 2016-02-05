@@ -1,102 +1,138 @@
 .axis path,
-.axis line {
+.axis line
+{
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
 }
 
-.dot {
+.dot
+{
     stroke: #000;
 }
 
-g.tick {
+g.tick
+{
     font-size: 11px;
 }
 
-div.padded {
+div.padded
+{
     padding: 2px;
-} 
+}
 
-div.rounded {
+div.rounded
+{
     border-radius: 6px;
 }
 
-div.tooltip {   
-    position: absolute;
+div.tooltip
+{
     font: 10px sans-serif;
-    color: white;
-    background: #404040;
-    border: 0px;
+
+    position: absolute;
+
     pointer-events: none;
+
+    color: white;
+    border: 0;
+    background: #404040;
 }
 
-.green {
+.green
+{
     fill: green;
 }
 
-.front {
+.front
+{
     pointer-events: none;
 }
 
-.left-align {
+.left-align
+{
     text-align: left;
 }
 
-.right-align {
+.right-align
+{
     text-align: right;
 }
 
-.center-align {
+.center-align
+{
     text-align: center;
 }
 
 
-.tooltip-cell {
+.tooltip-cell
+{
     padding: 4px;
-    border-bottom: 1px dashed #909090;
+
     border-right: 1px dashed #909090;
+    border-bottom: 1px dashed #909090;
 }
 
-.brush .extent {
+.brush .extent
+{
     stroke: #fff;
     fill-opacity: .125;
     shape-rendering: crispEdges;
 }
 
-.point {
+.point
+{
     pointer-events: all;
-    stroke:#000;
-    stroke-width:6px;
-    stroke-opacity:0;
+
+    stroke: #000;
+    stroke-width: 6px;
+    stroke-opacity: 0;
 }
 
-.title {
-    pointer-events: none;
+.title
+{
     font: 22px sans-serif;
     font-weight: bold;
+
+    pointer-events: none;
 }
 
-.label-text {
-    pointer-events: none;
+.label-text
+{
     font: 15px sans-serif;
     font-weight: bold;
+
+    pointer-events: none;
 }
 
 /* Generated using http://css3buttongenerator.com */
-.reset-button {
-  color: #ffffff;
-  font: 10px sans-serif;
-  background: #a1a1a1;
-  padding: 5px 10px 5px 10px;
-  text-decoration: none;
+.reset-button
+{
+    font: 10px sans-serif;
+
+    padding: 5px 10px 5px 10px;
+
+    text-decoration: none;
+
+    color: #fff;
+    background: #a1a1a1;
 }
 
-.reset-button:hover {
-  background: #0783d1;
-  background-image: -webkit-linear-gradient(top, #0783d1, #006eb8);
-  background-image: -moz-linear-gradient(top, #0783d1, #006eb8);
-  background-image: -ms-linear-gradient(top, #0783d1, #006eb8);
-  background-image: -o-linear-gradient(top, #0783d1, #006eb8);
-  background-image: linear-gradient(to bottom, #0783d1, #006eb8);
-  text-decoration: none;
+.reset-button:hover
+{
+    text-decoration: none;
+
+    background: #0783d1;
+    background-image: -webkit-linear-gradient(top, #0783d1, #006eb8);
+    background-image:    -moz-linear-gradient(top, #0783d1, #006eb8);
+    background-image:     -ms-linear-gradient(top, #0783d1, #006eb8);
+    background-image:      -o-linear-gradient(top, #0783d1, #006eb8);
+    background-image:         linear-gradient(to bottom, #0783d1, #006eb8);
+}
+
+.ui-autocomplete
+{
+    font-size: 1em;
+
+    background: #fff;
 }

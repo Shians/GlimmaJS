@@ -1,0 +1,3 @@
+glimma.init.processLinkages = function () {
+	
+};

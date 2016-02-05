@@ -1,10 +1,14 @@
+// Function to process the action linkages between charts
+
 glimma.init.processLinkages = function () {
 	for (var i=0; i<glimma.storage.linkage.length; i++) {
-		(function () {
+		// Closure to retain the indices
+		(function () { 
 			var from = glimma.storage.linkage[i].from - 1;
 			var to = glimma.storage.linkage[i].to - 1;
 			
-			if (glimma.storage.linkage[i].flag === "mds") {
+			// Special mds linkage
+			if (glimma.storage.linkage[i].flag === "mds") { 
 				glimma.storage.charts[from].on("click", 
 					function (d) {
 						if (d.name < 8) {
@@ -24,6 +28,7 @@ glimma.init.processLinkages = function () {
 						}
 					}
 				);
+			// Default linkage
 			} else {
 				var src = glimma.storage.linkage[i].src;
 				var dest = glimma.storage.linkage[i].dest;	

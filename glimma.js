@@ -37081,32 +37081,7 @@ require("./chart");
 
 require("./scatter");
 require("./bar");
-require("./mds");
-},{"./bar":17,"./chart":18,"./mds":20,"./scatter":21}],20:[function(require,module,exports){
-glimma.chart.mdsChart = function() {
-	var dimsChart = glimma.chart.scatterChart(),
-		eigenChart = glimma.chart.barChart;
-
-	dimsChart._swapDim = function (dim1, dim2) {
-		chart.x(function (d) { return d[["dim" + dim1]]; });
-    	chart.y(function (d) { return d[["dim" + dim2]]; });
-
-    	chart.xlab("Dimension " + dim1);
-    	chart.ylab("Dimension " + dim2);
-    	chart.update();
-	};
-
-	var container,
-		front,
-		data;
-
-	function chart(selection) {
-		var dispatcher = d3.dispatch("hover", "leave", "click");
-	}
-
-	return chart;
-};
-},{}],21:[function(require,module,exports){
+},{"./bar":17,"./chart":18,"./scatter":20}],20:[function(require,module,exports){
 /**
  * @return {Object}
  */
@@ -37120,8 +37095,8 @@ glimma.chart.scatterChart = function() {
 		yValue = function (d) { return d.y; },
 		idValue = function (d) { return d.id; },
 		idMap = function (d) { return d; },
-		sizeValue = function (d) { return 2; },
-		cValue = function (d) { return "black"; },
+		sizeValue = function (d) { return 2; }, //TODO: Maybe add size scale?
+		cValue = function (d) { return "black"; }, //TODO: Hex colour values
 		tooltip = ["x", "y"],
 		titleValue = "",
 		xLabel = "",
@@ -37638,11 +37613,11 @@ glimma.chart.scatterChart = function() {
 	return chart;
 };
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 require("./math.js");
 require("./methods.js");
 
-},{"./math.js":23,"./methods.js":24}],23:[function(require,module,exports){
+},{"./math.js":22,"./methods.js":23}],22:[function(require,module,exports){
 glimma.math = {};
 
 glimma.math.round = function(n, digits) {
@@ -37674,7 +37649,7 @@ glimma.math.signif = function(n, digits) {
 
 	return +n.toPrecision(digits);
 };
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 //* REQUIRES D3 *//
 // Method to get unique elements of array.
 if (typeof d3 !== "undefined") {
@@ -37685,7 +37660,7 @@ if (typeof d3 !== "undefined") {
 	}
 }
 
-},{}],25:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 window.jQuery = require("jquery");
 window.$ = window.jQuery;
 window.d3 = require("d3");
@@ -37696,7 +37671,7 @@ require("./init/index");
 require("./helper/index");
 require("./chart/index");
 require("./layout/index");
-},{"./chart/index":19,"./helper/index":22,"./init/index":27,"./layout/index":32,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],26:[function(require,module,exports){
+},{"./chart/index":19,"./helper/index":21,"./init/index":26,"./layout/index":31,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],25:[function(require,module,exports){
 window.glimma = {
 	storage: {
 		chartData: [],
@@ -37707,16 +37682,16 @@ window.glimma = {
 };
 
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 require("./glimma");
 require("./init");
 
 require("./initialise");
 require("./process_linkage");
 
-},{"./glimma":26,"./init":28,"./initialise":29,"./process_linkage":30}],28:[function(require,module,exports){
+},{"./glimma":25,"./init":27,"./initialise":28,"./process_linkage":29}],27:[function(require,module,exports){
 window.glimma.init = {};
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 // Cycle through constructed plots
 glimma.init.initialise = function() {
 	if (d3.select(".glimma-plot.available").node()) {
@@ -37727,7 +37702,7 @@ glimma.init.initialise = function() {
 };
 
 glimma.init.initialize = glimma.init.initialise;
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 glimma.init.processLinkages = function () {
 	for (var i=0; i<glimma.storage.linkage.length; i++) {
 		(function () {
@@ -37775,14 +37750,16 @@ glimma.init.processLinkages = function () {
 	}	
 };
 
-},{}],31:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  * Create an input button with 
  * @return {Object}
  */
-glimma.layout.addAutoInput = function(selection, options) {
-	var row = glimma.layout.bsAddRow(selection);
-	// var col = glimma.layout.bsAddCol(row, 12);
+glimma.layout.addAutoInput = function(selection, options, float) {
+	float = typeof float !== "undefined" ? float : "left";
+
+	var row = glimma.layout.bsAddRow(selection)
+					.style("float", float);
 
 	function addButton(selection, options) {
 		var input = selection.append("input");
@@ -37823,14 +37800,14 @@ glimma.layout.addAutoInput = function(selection, options) {
 
 	return addButton(row, options);
 };
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 require("./layout");
 
 require("./utilities");
 require("./autoinput");
-},{"./autoinput":31,"./layout":33,"./utilities":34}],33:[function(require,module,exports){
+},{"./autoinput":30,"./layout":32,"./utilities":33}],32:[function(require,module,exports){
 glimma.layout = {};
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 //* REQUIRES BOOTSTRAP.JS LIBRARY *//
 /**
  * @param  {selection} selection d3 selection to add row to.
@@ -37908,4 +37885,4 @@ glimma.layout.setupGrid = function(selection, type, dim) {
 		glimma.layout.setupRow(selection, sizes, type);
 	}
 };
-},{}]},{},[25]);
+},{}]},{},[24]);
