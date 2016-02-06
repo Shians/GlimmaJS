@@ -302,6 +302,14 @@ glimma.chart.barChart = function() {
 		container.call(chart);
 	};
 
+	chart.hide = function () {
+		container.style("display", "none");
+	};
+
+	chart.show = function () {
+		container.style("display", "block");
+	};
+
 	d3.rebind(chart, dispatcher, "on");
 	
 	return chart;
