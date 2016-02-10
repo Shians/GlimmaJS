@@ -37069,6 +37069,14 @@ glimma.chart.barChart = function() {
 		container.call(chart);
 	};
 
+	chart.hide = function () {
+		container.style("display", "none");
+	};
+
+	chart.show = function () {
+		container.style("display", "block");
+	};
+
 	d3.rebind(chart, dispatcher, "on");
 	
 	return chart;
@@ -37095,8 +37103,8 @@ glimma.chart.scatterChart = function() {
 		yValue = function (d) { return d.y; },
 		idValue = function (d) { return d.id; },
 		idMap = function (d) { return d; },
-		sizeValue = function (d) { return 2; }, //TODO: Maybe add size scale?
-		cValue = function (d) { return "black"; }, //TODO: Hex colour values
+		sizeValue = function () { return 2; }, //TODO: Maybe add size scale?
+		cValue = function () { return "black"; }, //TODO: Hex colour values
 		tooltip = ["x", "y"],
 		titleValue = "",
 		xLabel = "",
@@ -37104,6 +37112,7 @@ glimma.chart.scatterChart = function() {
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
+		cFixed = false;
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
 
@@ -37155,11 +37164,15 @@ glimma.chart.scatterChart = function() {
 				xScale.domain(data.map(xValue).unique())
 					.rangePoints([0, width - margin.left - margin.right], 1);
 			}
+			
 			if (yOrd) {
 				yScale.domain(data.map(yValue).unique())
 					.rangePoints([height - margin.top - margin.bottom, 0], 1);
 			}
-			if (cScale.domain() == []) {
+
+			if (cFixed) {
+				cScale = function (d) { return d; };
+			} else if (cScale.domain() == []) {
 				cScale.domain(data.map(function (d) { return cValue(d); }).unique()); //TODO: Allow fill with cValue without mapping
 			}
 		}
@@ -37432,6 +37445,16 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.fixedCol = function(_) {
+		cFixed = _;
+		if (_) {
+			cScale = function (d) { return d; };
+		} else {
+			cScale = d3.scale.category10();
+		}
+		return chart;
+	};
+
 	chart.xIsOrdinal = function() {
 		xScale = d3.scale.ordinal();
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0);
@@ -37608,6 +37631,14 @@ glimma.chart.scatterChart = function() {
 		container.call(chart);
 	};
 
+	chart.hide = function () {
+		container.style("display", "none");
+	};
+
+	chart.show = function () {
+		container.style("display", "block");
+	};
+
 	d3.rebind(chart, dispatcher, "on");
 	
 	return chart;
@@ -37671,13 +37702,14 @@ require("./init/index");
 require("./helper/index");
 require("./chart/index");
 require("./layout/index");
-},{"./chart/index":19,"./helper/index":21,"./init/index":26,"./layout/index":31,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],25:[function(require,module,exports){
+},{"./chart/index":19,"./helper/index":21,"./init/index":26,"./layout/index":32,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],25:[function(require,module,exports){
 window.glimma = {
 	storage: {
 		chartData: [],
 		chartInfo: [],
 		charts: [],
-		linkage: []		
+		linkage: [],
+		input: []		
 	}
 };
 
@@ -37688,28 +37720,72 @@ require("./init");
 
 require("./initialise");
 require("./process_linkage");
-
-},{"./glimma":25,"./init":27,"./initialise":28,"./process_linkage":29}],27:[function(require,module,exports){
+require("./process_inputs");
+},{"./glimma":25,"./init":27,"./initialise":28,"./process_inputs":29,"./process_linkage":30}],27:[function(require,module,exports){
 window.glimma.init = {};
 },{}],28:[function(require,module,exports){
 // Cycle through constructed plots
 glimma.init.initialise = function() {
 	if (d3.select(".glimma-plot.available").node()) {
-		for (var i=0; i<glimma.storage.chartInfo.length; i++) {
-			d3.select(".glimma-plot.available").datum(glimma.storage.chartData[i]).call(glimma.storage.charts[i]);
+		for (var i = 0; i < glimma.storage.chartInfo.length; i++) {
+			// if (glimma.storage.chartInfo[i].flag === "mdplot") {
+				// var temp = function (d) {
+				// 				if (d.PValue > 0.05) {
+				// 					return "#858585";
+				// 				} else if (d.PValue < 0.05) {
+				// 					if (d.logFC < 0) {
+				// 						return "#A8243E";
+				// 					} else {
+				// 						return "#5571A2";
+				// 					}
+				// 				}
+				// 			};
+				// glimma.storage.charts[i].col(temp)
+				// 						.fixedCol(true);
+
+				// d3.select(".glimma-plot.available")
+				// 	.datum(glimma.storage.chartData[i])
+				// 	.call(glimma.storage.charts[i]);
+			// } else {
+				d3.select(".glimma-plot.available")
+					.datum(glimma.storage.chartData[i])
+					.call(glimma.storage.charts[i]);
+			// }
 		}
 	}
 };
 
 glimma.init.initialize = glimma.init.initialise;
 },{}],29:[function(require,module,exports){
+// Function to process the inputs at initialisation
+
+glimma.init.processInputs = function () {
+	for (var i = 0; i < glimma.storage.input.length; i++) {
+		(function() {
+			var buttonInfo = glimma.storage.input[i],
+				chart = glimma.storage.charts[i],
+				container = glimma.storage.charts[i].container,
+				options = glimma.storage.chartData[i].map(function (d) { return d[buttonInfo.idval]; }),
+				button = glimma.layout.addAutoInput(container, options);
+
+				button.addAction(function (d) {
+					chart[buttonInfo.action](d);
+				});
+		}());
+	}
+};
+},{}],30:[function(require,module,exports){
+// Function to process the action linkages between charts
+
 glimma.init.processLinkages = function () {
-	for (var i=0; i<glimma.storage.linkage.length; i++) {
-		(function () {
+	for (var i = 0; i < glimma.storage.linkage.length; i++) {
+		// Closure to retain the indices
+		(function () { 
 			var from = glimma.storage.linkage[i].from - 1;
 			var to = glimma.storage.linkage[i].to - 1;
 			
-			if (glimma.storage.linkage[i].flag === "mds") {
+			// Special mds linkage
+			if (glimma.storage.linkage[i].flag === "mds") { 
 				glimma.storage.charts[from].on("click", 
 					function (d) {
 						if (d.name < 8) {
@@ -37729,9 +37805,10 @@ glimma.init.processLinkages = function () {
 						}
 					}
 				);
+			// Default linkage
 			} else {
 				var src = glimma.storage.linkage[i].src;
-				var dest = glimma.storage.linkage[i].dest;	
+				var dest = glimma.storage.linkage[i].dest;
 
 				if (dest == "hover" && dest == "hover") {
 					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
@@ -37750,7 +37827,7 @@ glimma.init.processLinkages = function () {
 	}	
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * Create an input button with 
  * @return {Object}
@@ -37758,8 +37835,7 @@ glimma.init.processLinkages = function () {
 glimma.layout.addAutoInput = function(selection, options, float) {
 	float = typeof float !== "undefined" ? float : "left";
 
-	var row = glimma.layout.bsAddRow(selection)
-					.style("float", float);
+	var row = glimma.layout.bsAddRow(selection);
 
 	function addButton(selection, options) {
 		var input = selection.append("input");
@@ -37800,14 +37876,14 @@ glimma.layout.addAutoInput = function(selection, options, float) {
 
 	return addButton(row, options);
 };
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 require("./layout");
 
 require("./utilities");
 require("./autoinput");
-},{"./autoinput":30,"./layout":32,"./utilities":33}],32:[function(require,module,exports){
+},{"./autoinput":31,"./layout":33,"./utilities":34}],33:[function(require,module,exports){
 glimma.layout = {};
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 //* REQUIRES BOOTSTRAP.JS LIBRARY *//
 /**
  * @param  {selection} selection d3 selection to add row to.

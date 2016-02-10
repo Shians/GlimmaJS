@@ -1,7 +1,7 @@
 // Function to process the action linkages between charts
 
 glimma.init.processLinkages = function () {
-	for (var i=0; i<glimma.storage.linkage.length; i++) {
+	for (var i = 0; i < glimma.storage.linkage.length; i++) {
 		// Closure to retain the indices
 		(function () { 
 			var from = glimma.storage.linkage[i].from - 1;
@@ -31,7 +31,7 @@ glimma.init.processLinkages = function () {
 			// Default linkage
 			} else {
 				var src = glimma.storage.linkage[i].src;
-				var dest = glimma.storage.linkage[i].dest;	
+				var dest = glimma.storage.linkage[i].dest;
 
 				if (dest == "hover" && dest == "hover") {
 					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {

@@ -6,6 +6,15 @@
     shape-rendering: crispEdges;
 }
 
+.ui-autocomplete
+{
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    max-height: 100px;
+}
+
 .dot
 {
     stroke: #000;
