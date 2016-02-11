@@ -14,6 +14,7 @@ glimma.chart.scatterChart = function() {
 		sizeValue = function () { return 2; }, //TODO: Maybe add size scale?
 		cValue = function () { return "black"; }, //TODO: Hex colour values
 		tooltip = ["x", "y"],
+		tooltipAlt = [],
 		titleValue = "",
 		xLabel = "",
 		yLabel = "",
@@ -318,7 +319,19 @@ glimma.chart.scatterChart = function() {
 	chart.tooltip = function(_) {
 		if (!arguments.length) return tooltip;
 		tooltip = typeof _ === "string" ? [_] : _;
+		if (tooltip.length !== tooltipAlt.length) {
+			tooltipAlt = [];
+		}
 		return chart;
+	};
+
+	chart.tooltipLabels = function(_) {
+		if (!arguments.length) return tooltipAlt;
+		var temp = typeof _ === "string" ? [_] : _;
+		if (temp.length === tooltip.length) {
+			tooltipAlt = temp;
+		}
+		return chart;	
 	};
 
 	chart.data = function(_) {
@@ -419,18 +432,25 @@ glimma.chart.scatterChart = function() {
 	}
 
 	function _showTooltip(data) {
-
+		// Remove existing tooltip
 		container.select(".tooltip")
 					.select("table")
 					.remove();
-
+		// Create table for tooltip
 		var table = container.select(".tooltip")
 								.append("table");
-
+		// Populate tooltip
 		for (var i=0; i<tooltip.length; i++) {
 			var row = table.append("tr");
 
-			row.append("td").attr("class", "right-align tooltip-cell").html(tooltip[i]);
+			// Property name
+			if (tooltipAlt.length !== 0) {
+				row.append("td").attr("class", "right-align tooltip-cell").html(tooltipAlt[i]);
+			} else {
+				row.append("td").attr("class", "right-align tooltip-cell").html(tooltip[i]);
+			}
+
+			// Property value
 			if (typeof data[tooltip[i]] == "number") {
 				if (ndigits === null) {
 					row.append("td").attr("class", "left-align tooltip-cell")
