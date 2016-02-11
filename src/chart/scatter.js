@@ -20,7 +20,7 @@ glimma.chart.scatterChart = function() {
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
-		cFixed = false;
+		cFixed = false,
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
 
@@ -270,7 +270,7 @@ glimma.chart.scatterChart = function() {
 		xValue = _;
 		return chart;
 	};
-
+	
 	chart.xlab = function(_) {
 		if (!arguments.length) return xLabel;
 		xLabel = _;
