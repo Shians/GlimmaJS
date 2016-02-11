@@ -185,6 +185,7 @@ glimma.chart.scatterChart = function() {
 						.attr("class", "point")
 						.attr("r", function (d) { return sizeValue(d); })
 						.style("fill", function (d) { return cScale(cValue(d)); })
+						.on("click", function (d) { dispatcher.click(d); })
 						.on("mouseover", function (d) { dispatcher.hover(d); })
 						.on("mouseout", function (d) { dispatcher.leave(d); });
 
@@ -243,6 +244,7 @@ glimma.chart.scatterChart = function() {
 			// Assign dispatcher events
 			dispatcher.on("hover", function (d) { chart.hover(d); });
 			dispatcher.on("leave", function (d) { chart.leave(d); });
+			dispatcher.on("click", function (d) { chart.click(d); });
 		}
 	}
 
@@ -270,7 +272,7 @@ glimma.chart.scatterChart = function() {
 		xValue = _;
 		return chart;
 	};
-	
+
 	chart.xlab = function(_) {
 		if (!arguments.length) return xLabel;
 		xLabel = _;
@@ -505,6 +507,7 @@ glimma.chart.scatterChart = function() {
 			_highlight(data);
 			_showTooltip(data);	
 		}
+		return chart;
 	};
 
 	chart.leave = function(data) {
@@ -512,6 +515,12 @@ glimma.chart.scatterChart = function() {
 			_hideTooltip();
 			_lowlight();	
 		}
+		return chart;
+	};
+
+	chart.click = function(data) {
+		chart.hover(data);
+		return chart;
 	};
 
 	chart.highlightById = function(id) {
@@ -524,27 +533,35 @@ glimma.chart.scatterChart = function() {
 		} else {
 			console.log("Not found");
 		}
+		return chart;
 	};
 
 	chart.rescale = function(extent) {
 		_rescale(extent);
+		return chart;
 	};
 
 	chart.update = function() {
 		container.call(chart);
+		return chart;
 	};
 
 	chart.refresh = function () {
 		extent = null;
 		container.call(chart);
+		return chart;
 	};
 
 	chart.hide = function () {
 		container.style("display", "none");
+		return chart;
 	};
 
 	chart.show = function () {
-		container.style("display", "block");
+		if (container.style("display") !== "block") {
+			container.style("display", "block");
+		}
+		return chart;
 	};
 
 	d3.rebind(chart, dispatcher, "on");
