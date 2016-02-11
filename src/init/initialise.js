@@ -2,7 +2,10 @@
 glimma.init.initialise = function() {
 	if (d3.select(".glimma-plot.available").node()) {
 		for (var i = 0; i < glimma.storage.chartInfo.length; i++) {
-			if (glimma.storage.chartInfo[i].flag === "mdplot") {
+			var chartInfo = glimma.storage.chartInfo[i];
+
+			// MD Plot initialisation
+			if (chartInfo.flag === "mdplot") {
 				var temp = function (d) {
 								if (d.PValue > 0.05) {
 									return "#858585";
@@ -20,10 +23,16 @@ glimma.init.initialise = function() {
 				d3.select(".glimma-plot.available")
 					.datum(glimma.storage.chartData[i])
 					.call(glimma.storage.charts[i]);
+			// Default initialisation
 			} else {
 				d3.select(".glimma-plot.available")
 					.datum(glimma.storage.chartData[i])
 					.call(glimma.storage.charts[i]);
+			}
+
+			// Hide plots if required
+			if (chartInfo.hide === "TRUE") {
+				glimma.storage.charts[i].hide();
 			}
 		}
 	}
