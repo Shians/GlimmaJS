@@ -37067,6 +37067,17 @@ glimma.chart.barChart = function() {
 
 	chart.update = function () {
 		container.call(chart);
+		return chart;
+	};
+
+	chart.hide = function () {
+		container.style("display", "none");
+		return chart;
+	};
+
+	chart.show = function () {
+		container.style("display", "block");
+		return chart;
 	};
 
 	d3.rebind(chart, dispatcher, "on");
@@ -37081,32 +37092,7 @@ require("./chart");
 
 require("./scatter");
 require("./bar");
-require("./mds");
-},{"./bar":17,"./chart":18,"./mds":20,"./scatter":21}],20:[function(require,module,exports){
-glimma.chart.mdsChart = function() {
-	var dimsChart = glimma.chart.scatterChart(),
-		eigenChart = glimma.chart.barChart;
-
-	dimsChart._swapDim = function (dim1, dim2) {
-		chart.x(function (d) { return d[["dim" + dim1]]; });
-    	chart.y(function (d) { return d[["dim" + dim2]]; });
-
-    	chart.xlab("Dimension " + dim1);
-    	chart.ylab("Dimension " + dim2);
-    	chart.update();
-	};
-
-	var container,
-		front,
-		data;
-
-	function chart(selection) {
-		var dispatcher = d3.dispatch("hover", "leave", "click");
-	}
-
-	return chart;
-};
-},{}],21:[function(require,module,exports){
+},{"./bar":17,"./chart":18,"./scatter":20}],20:[function(require,module,exports){
 /**
  * @return {Object}
  */
@@ -37120,15 +37106,17 @@ glimma.chart.scatterChart = function() {
 		yValue = function (d) { return d.y; },
 		idValue = function (d) { return d.id; },
 		idMap = function (d) { return d; },
-		sizeValue = function (d) { return 2; },
-		cValue = function (d) { return "black"; },
+		sizeValue = function () { return 2; }, //TODO: Maybe add size scale?
+		cValue = function () { return "black"; }, //TODO: Hex colour values
 		tooltip = ["x", "y"],
+		tooltipAlt = [],
 		titleValue = "",
 		xLabel = "",
 		yLabel = "",
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
+		cFixed = false,
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
 
@@ -37180,11 +37168,15 @@ glimma.chart.scatterChart = function() {
 				xScale.domain(data.map(xValue).unique())
 					.rangePoints([0, width - margin.left - margin.right], 1);
 			}
+			
 			if (yOrd) {
 				yScale.domain(data.map(yValue).unique())
 					.rangePoints([height - margin.top - margin.bottom, 0], 1);
 			}
-			if (cScale.domain() == []) {
+
+			if (cFixed) {
+				cScale = function (d) { return d; };
+			} else if (cScale.domain() == []) {
 				cScale.domain(data.map(function (d) { return cValue(d); }).unique()); //TODO: Allow fill with cValue without mapping
 			}
 		}
@@ -37197,6 +37189,8 @@ glimma.chart.scatterChart = function() {
 										.attr("class", "title center-align")
 										.style("width", width + "px")
 										.html(titleValue);
+			} else {
+				titleDiv.html(titleValue);
 			}
 		}
 
@@ -37289,6 +37283,7 @@ glimma.chart.scatterChart = function() {
 						.attr("class", "point")
 						.attr("r", function (d) { return sizeValue(d); })
 						.style("fill", function (d) { return cScale(cValue(d)); })
+						.on("click", function (d) { dispatcher.click(d); })
 						.on("mouseover", function (d) { dispatcher.hover(d); })
 						.on("mouseout", function (d) { dispatcher.leave(d); });
 
@@ -37347,6 +37342,7 @@ glimma.chart.scatterChart = function() {
 			// Assign dispatcher events
 			dispatcher.on("hover", function (d) { chart.hover(d); });
 			dispatcher.on("leave", function (d) { chart.leave(d); });
+			dispatcher.on("click", function (d) { chart.click(d); });
 		}
 	}
 
@@ -37420,7 +37416,19 @@ glimma.chart.scatterChart = function() {
 	chart.tooltip = function(_) {
 		if (!arguments.length) return tooltip;
 		tooltip = typeof _ === "string" ? [_] : _;
+		if (tooltip.length !== tooltipAlt.length) {
+			tooltipAlt = [];
+		}
 		return chart;
+	};
+
+	chart.tooltipLabels = function(_) {
+		if (!arguments.length) return tooltipAlt;
+		var temp = typeof _ === "string" ? [_] : _;
+		if (temp.length === tooltip.length) {
+			tooltipAlt = temp;
+		}
+		return chart;	
 	};
 
 	chart.data = function(_) {
@@ -37453,6 +37461,16 @@ glimma.chart.scatterChart = function() {
 		if (!arguments.length) return ndigits;
 		if (+_ % 1 === 0) {
 			ndigits = _;
+		}
+		return chart;
+	};
+
+	chart.fixedCol = function(_) {
+		cFixed = _;
+		if (_) {
+			cScale = function (d) { return d; };
+		} else {
+			cScale = d3.scale.category10();
 		}
 		return chart;
 	};
@@ -37511,18 +37529,25 @@ glimma.chart.scatterChart = function() {
 	}
 
 	function _showTooltip(data) {
-
+		// Remove existing tooltip
 		container.select(".tooltip")
 					.select("table")
 					.remove();
-
+		// Create table for tooltip
 		var table = container.select(".tooltip")
 								.append("table");
-
+		// Populate tooltip
 		for (var i=0; i<tooltip.length; i++) {
 			var row = table.append("tr");
 
-			row.append("td").attr("class", "right-align tooltip-cell").html(tooltip[i]);
+			// Property name
+			if (tooltipAlt.length !== 0) {
+				row.append("td").attr("class", "right-align tooltip-cell").html(tooltipAlt[i]);
+			} else {
+				row.append("td").attr("class", "right-align tooltip-cell").html(tooltip[i]);
+			}
+
+			// Property value
 			if (typeof data[tooltip[i]] == "number") {
 				if (ndigits === null) {
 					row.append("td").attr("class", "left-align tooltip-cell")
@@ -37599,6 +37624,7 @@ glimma.chart.scatterChart = function() {
 			_highlight(data);
 			_showTooltip(data);	
 		}
+		return chart;
 	};
 
 	chart.leave = function(data) {
@@ -37606,6 +37632,12 @@ glimma.chart.scatterChart = function() {
 			_hideTooltip();
 			_lowlight();	
 		}
+		return chart;
+	};
+
+	chart.click = function(data) {
+		chart.hover(data);
+		return chart;
 	};
 
 	chart.highlightById = function(id) {
@@ -37618,19 +37650,35 @@ glimma.chart.scatterChart = function() {
 		} else {
 			console.log("Not found");
 		}
+		return chart;
 	};
 
 	chart.rescale = function(extent) {
 		_rescale(extent);
+		return chart;
 	};
 
 	chart.update = function() {
 		container.call(chart);
+		return chart;
 	};
 
 	chart.refresh = function () {
 		extent = null;
 		container.call(chart);
+		return chart;
+	};
+
+	chart.hide = function () {
+		container.style("display", "none");
+		return chart;
+	};
+
+	chart.show = function () {
+		if (container.style("display") !== "block") {
+			container.style("display", "block");
+		}
+		return chart;
 	};
 
 	d3.rebind(chart, dispatcher, "on");
@@ -37638,11 +37686,11 @@ glimma.chart.scatterChart = function() {
 	return chart;
 };
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 require("./math.js");
 require("./methods.js");
 
-},{"./math.js":23,"./methods.js":24}],23:[function(require,module,exports){
+},{"./math.js":22,"./methods.js":23}],22:[function(require,module,exports){
 glimma.math = {};
 
 glimma.math.round = function(n, digits) {
@@ -37674,7 +37722,7 @@ glimma.math.signif = function(n, digits) {
 
 	return +n.toPrecision(digits);
 };
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 //* REQUIRES D3 *//
 // Method to get unique elements of array.
 if (typeof d3 !== "undefined") {
@@ -37685,7 +37733,7 @@ if (typeof d3 !== "undefined") {
 	}
 }
 
-},{}],25:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 window.jQuery = require("jquery");
 window.$ = window.jQuery;
 window.d3 = require("d3");
@@ -37696,45 +37744,91 @@ require("./init/index");
 require("./helper/index");
 require("./chart/index");
 require("./layout/index");
-},{"./chart/index":19,"./helper/index":22,"./init/index":27,"./layout/index":32,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],26:[function(require,module,exports){
+},{"./chart/index":19,"./helper/index":21,"./init/index":26,"./layout/index":32,"bootstrap":1,"d3":14,"jquery":16,"jquery-ui":15}],25:[function(require,module,exports){
 window.glimma = {
 	storage: {
 		chartData: [],
 		chartInfo: [],
 		charts: [],
-		linkage: []		
+		linkage: [],
+		input: []		
 	}
 };
 
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 require("./glimma");
 require("./init");
 
 require("./initialise");
 require("./process_linkage");
-
-},{"./glimma":26,"./init":28,"./initialise":29,"./process_linkage":30}],28:[function(require,module,exports){
+require("./process_inputs");
+},{"./glimma":25,"./init":27,"./initialise":28,"./process_inputs":29,"./process_linkage":30}],27:[function(require,module,exports){
 window.glimma.init = {};
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 // Cycle through constructed plots
 glimma.init.initialise = function() {
 	if (d3.select(".glimma-plot.available").node()) {
-		for (var i=0; i<glimma.storage.chartInfo.length; i++) {
-			d3.select(".glimma-plot.available").datum(glimma.storage.chartData[i]).call(glimma.storage.charts[i]);
+		for (var i = 0; i < glimma.storage.chartInfo.length; i++) {
+			var chartInfo = glimma.storage.chartInfo[i];
+
+			// MD Plot initialisation
+			if (chartInfo.flag === "mdplot") {
+				var temp = function (d) { return d.col; };
+				glimma.storage.charts[i].col(temp)
+										.fixedCol(true);
+
+				d3.select(".glimma-plot.available")
+					.datum(glimma.storage.chartData[i])
+					.call(glimma.storage.charts[i]);
+			// Default initialisation
+			} else {
+				d3.select(".glimma-plot.available")
+					.datum(glimma.storage.chartData[i])
+					.call(glimma.storage.charts[i]);
+			}
+
+			// Hide plots if required
+			if (chartInfo.hide === "TRUE") {
+				glimma.storage.charts[i].hide();
+			}
 		}
 	}
 };
 
 glimma.init.initialize = glimma.init.initialise;
+},{}],29:[function(require,module,exports){
+// Function to process the inputs at initialisation
+
+glimma.init.processInputs = function () {
+	for (var i = 0; i < glimma.storage.input.length; i++) {
+		(function() {
+			var buttonInfo = glimma.storage.input[i],
+				chart = glimma.storage.charts[i],
+				container = glimma.storage.charts[i].container,
+				options = glimma.storage.chartData[i].map(function (d) { return d[buttonInfo.idval]; }),
+				button = glimma.layout.addAutoInput(container, options);
+
+				button.addAction(function (d) {
+					chart[buttonInfo.action](d);
+				});
+		}());
+	}
+};
 },{}],30:[function(require,module,exports){
+// Function to process the action linkages between charts
+
 glimma.init.processLinkages = function () {
-	for (var i=0; i<glimma.storage.linkage.length; i++) {
-		(function () {
+	for (var i = 0; i < glimma.storage.linkage.length; i++) {
+		// Closure to retain the indices
+		(function () { 
 			var from = glimma.storage.linkage[i].from - 1;
 			var to = glimma.storage.linkage[i].to - 1;
+
+			var flag = glimma.storage.linkage[i].flag;
 			
-			if (glimma.storage.linkage[i].flag === "mds") {
+			// Special mds linkage
+			if (flag === "mds") { 
 				glimma.storage.charts[from].on("click", 
 					function (d) {
 						if (d.name < 8) {
@@ -37754,9 +37848,30 @@ glimma.init.processLinkages = function () {
 						}
 					}
 				);
+			} else if (flag === "byKey") { // TODO: Alter tooltip on change.
+				var src = glimma.storage.linkage[i].src;
+				var dest = glimma.storage.linkage[i].dest;
+
+				var key = glimma.storage.linkage[i].info;
+
+				if (dest === "xChange") {
+					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
+						var updateKey = (typeof d[key] === "number") ? "X" + String(d[key]) : d[key];
+						glimma.storage.charts[to].x(function (d) { return d[updateKey]; }).title(String(d[key]));
+						glimma.storage.charts[to].refresh().show();
+					});
+				} else if (dest === "yChange") {
+					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
+						var updateKey = (typeof d[key] === "number") ? "X" + String(d[key]) : d[key];
+						glimma.storage.charts[to].y(function (d) { return d[updateKey]; }).title(String(d[key]));
+						glimma.storage.charts[to].refresh().show();
+					});
+				}
+
+			// Default linkage
 			} else {
 				var src = glimma.storage.linkage[i].src;
-				var dest = glimma.storage.linkage[i].dest;	
+				var dest = glimma.storage.linkage[i].dest;
 
 				if (dest == "hover" && dest == "hover") {
 					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
@@ -37780,9 +37895,10 @@ glimma.init.processLinkages = function () {
  * Create an input button with 
  * @return {Object}
  */
-glimma.layout.addAutoInput = function(selection, options) {
+glimma.layout.addAutoInput = function(selection, options, float) {
+	float = typeof float !== "undefined" ? float : "left";
+
 	var row = glimma.layout.bsAddRow(selection);
-	// var col = glimma.layout.bsAddCol(row, 12);
 
 	function addButton(selection, options) {
 		var input = selection.append("input");
@@ -37908,4 +38024,4 @@ glimma.layout.setupGrid = function(selection, type, dim) {
 		glimma.layout.setupRow(selection, sizes, type);
 	}
 };
-},{}]},{},[25]);
+},{}]},{},[24]);

@@ -11,15 +11,17 @@ glimma.chart.scatterChart = function() {
 		yValue = function (d) { return d.y; },
 		idValue = function (d) { return d.id; },
 		idMap = function (d) { return d; },
-		sizeValue = function (d) { return 2; }, //TODO: Maybe add size scale?
-		cValue = function (d) { return "black"; }, //TODO: Hex colour values
+		sizeValue = function () { return 2; }, //TODO: Maybe add size scale?
+		cValue = function () { return "black"; }, //TODO: Hex colour values
 		tooltip = ["x", "y"],
+		tooltipAlt = [],
 		titleValue = "",
 		xLabel = "",
 		yLabel = "",
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
+		cFixed = false,
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
 
@@ -71,11 +73,15 @@ glimma.chart.scatterChart = function() {
 				xScale.domain(data.map(xValue).unique())
 					.rangePoints([0, width - margin.left - margin.right], 1);
 			}
+			
 			if (yOrd) {
 				yScale.domain(data.map(yValue).unique())
 					.rangePoints([height - margin.top - margin.bottom, 0], 1);
 			}
-			if (cScale.domain() == []) {
+
+			if (cFixed) {
+				cScale = function (d) { return d; };
+			} else if (cScale.domain() == []) {
 				cScale.domain(data.map(function (d) { return cValue(d); }).unique()); //TODO: Allow fill with cValue without mapping
 			}
 		}
@@ -88,6 +94,8 @@ glimma.chart.scatterChart = function() {
 										.attr("class", "title center-align")
 										.style("width", width + "px")
 										.html(titleValue);
+			} else {
+				titleDiv.html(titleValue);
 			}
 		}
 
@@ -180,6 +188,7 @@ glimma.chart.scatterChart = function() {
 						.attr("class", "point")
 						.attr("r", function (d) { return sizeValue(d); })
 						.style("fill", function (d) { return cScale(cValue(d)); })
+						.on("click", function (d) { dispatcher.click(d); })
 						.on("mouseover", function (d) { dispatcher.hover(d); })
 						.on("mouseout", function (d) { dispatcher.leave(d); });
 
@@ -238,6 +247,7 @@ glimma.chart.scatterChart = function() {
 			// Assign dispatcher events
 			dispatcher.on("hover", function (d) { chart.hover(d); });
 			dispatcher.on("leave", function (d) { chart.leave(d); });
+			dispatcher.on("click", function (d) { chart.click(d); });
 		}
 	}
 
@@ -311,7 +321,19 @@ glimma.chart.scatterChart = function() {
 	chart.tooltip = function(_) {
 		if (!arguments.length) return tooltip;
 		tooltip = typeof _ === "string" ? [_] : _;
+		if (tooltip.length !== tooltipAlt.length) {
+			tooltipAlt = [];
+		}
 		return chart;
+	};
+
+	chart.tooltipLabels = function(_) {
+		if (!arguments.length) return tooltipAlt;
+		var temp = typeof _ === "string" ? [_] : _;
+		if (temp.length === tooltip.length) {
+			tooltipAlt = temp;
+		}
+		return chart;	
 	};
 
 	chart.data = function(_) {
@@ -344,6 +366,16 @@ glimma.chart.scatterChart = function() {
 		if (!arguments.length) return ndigits;
 		if (+_ % 1 === 0) {
 			ndigits = _;
+		}
+		return chart;
+	};
+
+	chart.fixedCol = function(_) {
+		cFixed = _;
+		if (_) {
+			cScale = function (d) { return d; };
+		} else {
+			cScale = d3.scale.category10();
 		}
 		return chart;
 	};
@@ -402,18 +434,25 @@ glimma.chart.scatterChart = function() {
 	}
 
 	function _showTooltip(data) {
-
+		// Remove existing tooltip
 		container.select(".tooltip")
 					.select("table")
 					.remove();
-
+		// Create table for tooltip
 		var table = container.select(".tooltip")
 								.append("table");
-
+		// Populate tooltip
 		for (var i=0; i<tooltip.length; i++) {
 			var row = table.append("tr");
 
-			row.append("td").attr("class", "right-align tooltip-cell").html(tooltip[i]);
+			// Property name
+			if (tooltipAlt.length !== 0) {
+				row.append("td").attr("class", "right-align tooltip-cell").html(tooltipAlt[i]);
+			} else {
+				row.append("td").attr("class", "right-align tooltip-cell").html(tooltip[i]);
+			}
+
+			// Property value
 			if (typeof data[tooltip[i]] == "number") {
 				if (ndigits === null) {
 					row.append("td").attr("class", "left-align tooltip-cell")
@@ -490,6 +529,7 @@ glimma.chart.scatterChart = function() {
 			_highlight(data);
 			_showTooltip(data);	
 		}
+		return chart;
 	};
 
 	chart.leave = function(data) {
@@ -497,6 +537,12 @@ glimma.chart.scatterChart = function() {
 			_hideTooltip();
 			_lowlight();	
 		}
+		return chart;
+	};
+
+	chart.click = function(data) {
+		chart.hover(data);
+		return chart;
 	};
 
 	chart.highlightById = function(id) {
@@ -509,19 +555,35 @@ glimma.chart.scatterChart = function() {
 		} else {
 			console.log("Not found");
 		}
+		return chart;
 	};
 
 	chart.rescale = function(extent) {
 		_rescale(extent);
+		return chart;
 	};
 
 	chart.update = function() {
 		container.call(chart);
+		return chart;
 	};
 
 	chart.refresh = function () {
 		extent = null;
 		container.call(chart);
+		return chart;
+	};
+
+	chart.hide = function () {
+		container.style("display", "none");
+		return chart;
+	};
+
+	chart.show = function () {
+		if (container.style("display") !== "block") {
+			container.style("display", "block");
+		}
+		return chart;
 	};
 
 	d3.rebind(chart, dispatcher, "on");
