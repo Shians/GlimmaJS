@@ -30,26 +30,26 @@ glimma.init.processLinkages = function () {
 						}
 					}
 				);
-			} else if (flag === "byKey") {
+			} else if (flag === "byKey") { // TODO: Alter tooltip on change.
 				var src = glimma.storage.linkage[i].src;
 				var dest = glimma.storage.linkage[i].dest;
 
 				var key = glimma.storage.linkage[i].info;
 
-
 				if (dest === "xChange") {
 					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 						var updateKey = (typeof d[key] === "number") ? "X" + String(d[key]) : d[key];
-						glimma.storage.charts[to].x(function (d) { return d[updateKey]; });
+						glimma.storage.charts[to].x(function (d) { return d[updateKey]; }).title(String(d[key]));
 						glimma.storage.charts[to].refresh().show();
 					});
 				} else if (dest === "yChange") {
 					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 						var updateKey = (typeof d[key] === "number") ? "X" + String(d[key]) : d[key];
-						glimma.storage.charts[to].y(function (d) { return d[updateKey]; });
+						glimma.storage.charts[to].y(function (d) { return d[updateKey]; }).title(String(d[key]));
 						glimma.storage.charts[to].refresh().show();
 					});
 				}
+
 			// Default linkage
 			} else {
 				var src = glimma.storage.linkage[i].src;

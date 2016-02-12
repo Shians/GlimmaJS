@@ -6,17 +6,7 @@ glimma.init.initialise = function() {
 
 			// MD Plot initialisation
 			if (chartInfo.flag === "mdplot") {
-				var temp = function (d) {
-								if (d.PValue > 0.05) {
-									return "#858585";
-								} else if (d.PValue < 0.05) {
-									if (d.logFC < 0) {
-										return "#A8243E";
-									} else {
-										return "#5571A2";
-									}
-								}
-							};
+				var temp = function (d) { return d.col; };
 				glimma.storage.charts[i].col(temp)
 										.fixedCol(true);
 

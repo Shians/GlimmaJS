@@ -94,6 +94,8 @@ glimma.chart.scatterChart = function() {
 										.attr("class", "title center-align")
 										.style("width", width + "px")
 										.html(titleValue);
+			} else {
+				titleDiv.html(titleValue);
 			}
 		}
 
