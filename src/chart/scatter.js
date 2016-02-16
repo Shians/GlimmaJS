@@ -563,7 +563,7 @@ glimma.chart.scatterChart = function() {
 		});
 
 		if (selectedData.length !== 0) {
-			chart.hover(selectedData[0]);
+			dispatcher.hover(selectedData[0]);
 		} else {
 			console.log("Not found");
 		}
