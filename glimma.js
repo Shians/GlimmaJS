@@ -37113,6 +37113,8 @@ glimma.chart.scatterChart = function() {
 		titleValue = "",
 		xLabel = "",
 		yLabel = "",
+		xJitter = 0,
+		yJitter = 0,
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
@@ -37290,11 +37292,11 @@ glimma.chart.scatterChart = function() {
 			// Update positions
 			if (cirContainer.node().childElementCount < 2000) {
 				cirContainer.transition()
-							.attr("cx", function (d) { return xScale(xValue(d)); })
-							.attr("cy", function (d) { return yScale(yValue(d)); });
+							.attr("cx", function (d) { return xJitter * Math.random() + xScale(xValue(d)); })
+							.attr("cy", function (d) { return yJitter * Math.random() + yScale(yValue(d)); });
 			} else {
-				cirContainer.attr("cx", function (d) { return xScale(xValue(d)); })
-							.attr("cy", function (d) { return yScale(yValue(d)); });
+				cirContainer.attr("cx", function (d) { return xJitter * Math.random() + xScale(xValue(d)); })
+							.attr("cy", function (d) { return yJitter * Math.random() + yScale(yValue(d)); });
 			}
 		}
 		
@@ -37371,6 +37373,14 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.xJitter = function(_) {
+		if (!arguments.length) return xValue;
+		if (typeof _ === "number") {
+			xJitter = _;
+		}
+		return chart;
+	};
+
 	chart.xlab = function(_) {
 		if (!arguments.length) return xLabel;
 		xLabel = _;
@@ -37380,6 +37390,14 @@ glimma.chart.scatterChart = function() {
 	chart.y = function(_) {
 		if (!arguments.length) return yValue;
 		yValue = _;
+		return chart;
+	};
+
+	chart.yJitter = function(_) {
+		if (!arguments.length) return yValue;
+		if (typeof _ === "number") {
+			yJitter = _;
+		}
 		return chart;
 	};
 
@@ -37849,12 +37867,15 @@ glimma.init.processLinkages = function () {
 								var tmpstr2 = "Dimension " + d.name;
 								var tmpstr3 = "dim" + (d.name + 1);
 								var tmpstr4 = "Dimension " + (d.name + 1);
+
+								var old = glimma.storage.charts[to].tooltip().slice(0, -2);
+
 								glimma.storage.charts[to]
 									.x(function (d) { return d[tmpstr1]; })
 									.xlab(tmpstr2)
 									.y(function (d) { return d[tmpstr3]; })
 									.ylab(tmpstr4)
-									.tooltip(["labels", tmpstr1, tmpstr3]);
+									.tooltip(old.concat([tmpstr1, tmpstr3]));
 							}());
 							glimma.storage.charts[to].refresh();	
 						}

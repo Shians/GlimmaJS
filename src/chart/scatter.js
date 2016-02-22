@@ -18,6 +18,8 @@ glimma.chart.scatterChart = function() {
 		titleValue = "",
 		xLabel = "",
 		yLabel = "",
+		xJitter = 0,
+		yJitter = 0,
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
@@ -195,11 +197,11 @@ glimma.chart.scatterChart = function() {
 			// Update positions
 			if (cirContainer.node().childElementCount < 2000) {
 				cirContainer.transition()
-							.attr("cx", function (d) { return xScale(xValue(d)); })
-							.attr("cy", function (d) { return yScale(yValue(d)); });
+							.attr("cx", function (d) { return xJitter * Math.random() + xScale(xValue(d)); })
+							.attr("cy", function (d) { return yJitter * Math.random() + yScale(yValue(d)); });
 			} else {
-				cirContainer.attr("cx", function (d) { return xScale(xValue(d)); })
-							.attr("cy", function (d) { return yScale(yValue(d)); });
+				cirContainer.attr("cx", function (d) { return xJitter * Math.random() + xScale(xValue(d)); })
+							.attr("cy", function (d) { return yJitter * Math.random() + yScale(yValue(d)); });
 			}
 		}
 		
@@ -276,6 +278,14 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.xJitter = function(_) {
+		if (!arguments.length) return xValue;
+		if (typeof _ === "number") {
+			xJitter = _;
+		}
+		return chart;
+	};
+
 	chart.xlab = function(_) {
 		if (!arguments.length) return xLabel;
 		xLabel = _;
@@ -285,6 +295,14 @@ glimma.chart.scatterChart = function() {
 	chart.y = function(_) {
 		if (!arguments.length) return yValue;
 		yValue = _;
+		return chart;
+	};
+
+	chart.yJitter = function(_) {
+		if (!arguments.length) return yValue;
+		if (typeof _ === "number") {
+			yJitter = _;
+		}
 		return chart;
 	};
 
