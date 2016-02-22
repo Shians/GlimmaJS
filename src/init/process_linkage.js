@@ -19,12 +19,15 @@ glimma.init.processLinkages = function () {
 								var tmpstr2 = "Dimension " + d.name;
 								var tmpstr3 = "dim" + (d.name + 1);
 								var tmpstr4 = "Dimension " + (d.name + 1);
+
+								var old = glimma.storage.charts[to].tooltip().slice(0, -2);
+
 								glimma.storage.charts[to]
 									.x(function (d) { return d[tmpstr1]; })
 									.xlab(tmpstr2)
 									.y(function (d) { return d[tmpstr3]; })
 									.ylab(tmpstr4)
-									.tooltip(["labels", tmpstr1, tmpstr3]);
+									.tooltip(old.concat([tmpstr1, tmpstr3]));
 							}());
 							glimma.storage.charts[to].refresh();	
 						}
