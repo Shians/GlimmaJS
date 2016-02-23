@@ -33,24 +33,60 @@ glimma.init.processLinkages = function () {
 						}
 					}
 				);
-			} else if (flag === "byKey") { // TODO: Alter tooltip on change.
+			} else if (flag === "byKey") {
 				var src = glimma.storage.linkage[i].src;
 				var dest = glimma.storage.linkage[i].dest;
 
 				var key = glimma.storage.linkage[i].info;
 
 				if (dest === "xChange") {
-					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
-						var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key];
-						glimma.storage.charts[to].x(function (d) { return d[updateKey]; }).title(String(d[key]));
-						glimma.storage.charts[to].refresh().show();
-					});
+					if (src === "click") {
+						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
+							var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+
+							glimma.storage.charts[to].x(function (d) { return d[updateKey]; })
+														.title(String(d[key]))
+														.tooltip(["Sample", updateKey])
+														.refresh()
+														.show();
+						});
+					} else {
+						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
+							if (!glimma.storage.charts[from].holdTooltip()) {
+								var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+
+								glimma.storage.charts[to].x(function (d) { return d[updateKey]; })
+															.title(String(d[key]))
+															.tooltip(["Sample", updateKey])
+															.refresh()
+															.show();
+							}
+						});
+					}
 				} else if (dest === "yChange") {
-					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
-						var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key];
-						glimma.storage.charts[to].y(function (d) { return d[updateKey]; }).title(String(d[key]));
-						glimma.storage.charts[to].refresh().show();
-					});
+					if (src === "click") {
+						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
+							var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+
+							glimma.storage.charts[to].y(function (d) { return d[updateKey]; })
+														.title(String(d[key]))
+														.tooltip(["Sample", updateKey])
+														.refresh()
+														.show();
+						});	
+					} else {
+						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
+							if (!glimma.storage.charts[from].holdTooltip()) {
+								var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+
+								glimma.storage.charts[to].y(function (d) { return d[updateKey]; })
+															.title(String(d[key]))
+															.tooltip(["Sample", updateKey])
+															.refresh()
+															.show();
+							}
+						});	
+					}
 				}
 
 			// Default linkage
