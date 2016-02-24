@@ -24,6 +24,8 @@ glimma.chart.scatterChart = function() {
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
 		cFixed = false,
+		holdTooltip = false,
+		tooltipData = {}, 
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
 
@@ -42,6 +44,9 @@ glimma.chart.scatterChart = function() {
 		xOrd = typeof xScale.rangeBands === "function";
 		yOrd = typeof yScale.rangeBands === "function";
 
+		if (typeof selection.data()[0][0].xJitter === "undefined") {
+			addJitter();
+		}
 		occupyContainer();
 		assignData();
 		createDimensions();
@@ -56,6 +61,14 @@ glimma.chart.scatterChart = function() {
 		drawPoints();
 		drawAxis();
 		bindDispatcher();
+
+		function addJitter() {
+			selection.data()[0] = selection.data()[0].map(function(d) {
+				d.xJitter = (Math.random() - 0.5) * xJitter;
+				d.yJitter = (Math.random() - 0.5) * yJitter;
+				return d;
+			});
+		}
 
 		function occupyContainer() {
 			chart.container = container = selection;
@@ -197,11 +210,11 @@ glimma.chart.scatterChart = function() {
 			// Update positions
 			if (cirContainer.node().childElementCount < 2000) {
 				cirContainer.transition()
-							.attr("cx", function (d) { return xJitter * Math.random() + xScale(xValue(d)); })
-							.attr("cy", function (d) { return yJitter * Math.random() + yScale(yValue(d)); });
+							.attr("cx", function (d) { return d.xJitter + xScale(xValue(d)); })
+							.attr("cy", function (d) { return d.yJitter + yScale(yValue(d)); });
 			} else {
-				cirContainer.attr("cx", function (d) { return xJitter * Math.random() + xScale(xValue(d)); })
-							.attr("cy", function (d) { return yJitter * Math.random() + yScale(yValue(d)); });
+				cirContainer.attr("cx", function (d) { return d.xJitter + xScale(xValue(d)); })
+							.attr("cy", function (d) { return d.yJitter + yScale(yValue(d)); });
 			}
 		}
 		
@@ -247,7 +260,7 @@ glimma.chart.scatterChart = function() {
 
 		function bindDispatcher() {
 			// Assign dispatcher events
-			dispatcher.on("hover", function (d) { chart.hover(d); });
+			dispatcher.on("hover", function (d) { if (!holdTooltip) chart.hover(d); });
 			dispatcher.on("leave", function (d) { chart.leave(d); });
 			dispatcher.on("click", function (d) { chart.click(d); });
 		}
@@ -279,7 +292,7 @@ glimma.chart.scatterChart = function() {
 	};
 
 	chart.xJitter = function(_) {
-		if (!arguments.length) return xValue;
+		if (!arguments.length) return xJitter;
 		if (typeof _ === "number") {
 			xJitter = _;
 		}
@@ -299,7 +312,7 @@ glimma.chart.scatterChart = function() {
 	};
 
 	chart.yJitter = function(_) {
-		if (!arguments.length) return yValue;
+		if (!arguments.length) return yJitter;
 		if (typeof _ === "number") {
 			yJitter = _;
 		}
@@ -388,6 +401,12 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.holdTooltip = function(_) {
+		if (!arguments.length) return holdTooltip;
+		if (typeof _ === "boolean") holdTooltip = _;
+		return chart;
+	};
+
 	chart.fixedCol = function(_) {
 		cFixed = _;
 		if (_) {
@@ -441,8 +460,8 @@ glimma.chart.scatterChart = function() {
 			c = front.append("circle");
 		}
 
-		c.attr("cx", xScale(xValue(data)))
-			.attr("cy", yScale(yValue(data)))
+		c.attr("cx", data.xJitter + xScale(xValue(data)))
+			.attr("cy", data.yJitter + yScale(yValue(data)))
 			.attr("r", sizeValue(data) + 2)
 			.style("opacity", 1)
 			.style("stroke", "white")
@@ -496,10 +515,10 @@ glimma.chart.scatterChart = function() {
 			}
 		}
 
-		tooltipLeft = xScale(xValue(data));
+		tooltipLeft = data.xJitter + xScale(xValue(data));
 		tooltipLeft += margin.left + margin.right;
 
-		tooltipTop = yScale(yValue(data));
+		tooltipTop = data.yJitter + yScale(yValue(data));
 		tooltipTop += margin.top + container.select("svg").node().offsetTop;
 		tooltipTop -= 3 + container.select(".tooltip").node().offsetHeight;
 		tooltipTop = tooltipTop < 0 ? 0 : tooltipTop;
@@ -563,15 +582,26 @@ glimma.chart.scatterChart = function() {
 	};
 
 	chart.leave = function(data) {
-		if (_withinExtent(data, extent) || xOrd || yOrd) {
-			_hideTooltip();
-			_lowlight();	
+		if (!holdTooltip) {
+			if (_withinExtent(data, extent) || xOrd || yOrd) {
+				_hideTooltip();
+				_lowlight();	
+			}
 		}
 		return chart;
 	};
 
 	chart.click = function(data) {
+		if (JSON.stringify(data) === JSON.stringify(tooltipData)) {
+			chart.holdTooltip(false);
+		} else {
+			chart.holdTooltip(true);
+		}
+
 		chart.hover(data);
+
+		tooltipData = data;
+
 		return chart;
 	};
 
