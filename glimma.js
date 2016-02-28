@@ -36839,7 +36839,7 @@ glimma.chart.barChart = function() {
 
 		function drawSkeleton() {
 			// Otherwise, create the skeletal chart.
-			var gEnter = svg.enter().append("svg").append("g");
+			var gEnter = svg.enter().append("svg").attr("class", "plot-svg").append("g");
 			gEnter.append("g").attr("class", "brush"); // brush
 			gEnter.append("g").attr("class", "brush-cover"); // brush
 			gEnter.append("g").attr("class", "x axis"); // x axis
@@ -37105,6 +37105,7 @@ glimma.chart.scatterChart = function() {
 		xValue = function (d) { return d.x; },
 		yValue = function (d) { return d.y; },
 		idValue = function (d) { return d.id; },
+		searchValue = function (d) {return d.search; },
 		idMap = function (d) { return d; },
 		sizeValue = function () { return 2; }, //TODO: Maybe add size scale?
 		cValue = function () { return "black"; }, //TODO: Hex colour values
@@ -37247,7 +37248,7 @@ glimma.chart.scatterChart = function() {
 
 		function drawSkeleton() {
 			// Otherwise, create the skeletal chart.
-			var gEnter = svg.enter().append("svg").append("g");
+			var gEnter = svg.enter().append("svg").attr("class", "plot-svg").append("g");
 			gEnter.append("g").attr("class", "brush"); // brush
 			gEnter.append("g").attr("class", "brush-cover"); // brush
 			gEnter.append("g").attr("class", "x axis"); // x axis
@@ -37425,6 +37426,12 @@ glimma.chart.scatterChart = function() {
 		idValue = _;
 		return chart;
 	};
+
+	chart.searchValue = function(_) {
+		if (!arguments.length) return searchValue;
+		searchValue = _;
+		return chart;
+	}
 
 	chart.idMap = function(_) {
 		if (!arguments.length) return idMap;
@@ -37700,9 +37707,9 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
-	chart.highlightById = function(id) {
+	chart.highlightBySearch = function(query) {
 		var selectedData = data.filter(function (d) {
-			return (idMap(idValue(d)) === id);
+			return (searchValue(d) === query);
 		});
 
 		if (selectedData.length !== 0) {

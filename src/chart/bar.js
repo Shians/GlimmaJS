@@ -72,7 +72,7 @@ glimma.chart.barChart = function() {
 
 		function drawSkeleton() {
 			// Otherwise, create the skeletal chart.
-			var gEnter = svg.enter().append("svg").append("g");
+			var gEnter = svg.enter().append("svg").attr("class", "plot-svg").append("g");
 			gEnter.append("g").attr("class", "brush"); // brush
 			gEnter.append("g").attr("class", "brush-cover"); // brush
 			gEnter.append("g").attr("class", "x axis"); // x axis

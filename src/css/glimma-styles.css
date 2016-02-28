@@ -48,6 +48,13 @@ div.tooltip
     background: #404040;
 }
 
+svg.plot-svg
+{
+    display: block;
+
+    margin: auto;
+}
+
 .green
 {
     fill: green;
