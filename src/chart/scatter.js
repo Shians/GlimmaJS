@@ -522,8 +522,13 @@ glimma.chart.scatterChart = function() {
 			}
 		}
 
+		function pxToNum(px) {
+			return +px.replace("px", "");
+		};
+
 		tooltipLeft = data.xJitter + xScale(xValue(data));
 		tooltipLeft += margin.left + margin.right;
+		tooltipLeft += pxToNum(container.select("svg").style("margin-left"));
 
 		tooltipTop = data.yJitter + yScale(yValue(data));
 		tooltipTop += margin.top + container.select("svg").node().offsetTop;
