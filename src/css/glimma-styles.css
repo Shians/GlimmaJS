@@ -110,6 +110,8 @@ svg.plot-svg
     font: 22px sans-serif;
     font-weight: bold;
 
+    margin: auto;
+
     pointer-events: none;
 }
 
