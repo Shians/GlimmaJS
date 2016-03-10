@@ -550,6 +550,8 @@ glimma.chart.scatterChart = function() {
 	function _rescale(brushExtent) {
 		var newData = container.data()[0].filter(function (d) { return _withinBrush(d, brushExtent); });
 		if (newData.length > 0) {
+			_hideTooltip();
+			_lowlight();
 			container.select(".reset-button").style("opacity", 1).style("pointer-events", "auto");
 			chart.data(newData);
 			chart.extent({"x": [brushExtent[0][0], brushExtent[1][0]], "y": [brushExtent[0][1], brushExtent[1][1]]});
@@ -558,6 +560,8 @@ glimma.chart.scatterChart = function() {
 	}
 
 	function _resetScale() {
+		_hideTooltip();
+		_lowlight();
 		chart.data(container.data()[0]);
 		container.select(".reset-button").style("opacity", 0).style("pointer-events", "none");
 		extent = null;
