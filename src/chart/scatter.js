@@ -336,7 +336,7 @@ glimma.chart.scatterChart = function() {
 		if (!arguments.length) return searchValue;
 		searchValue = _;
 		return chart;
-	}
+	};
 
 	chart.idMap = function(_) {
 		if (!arguments.length) return idMap;
@@ -524,7 +524,7 @@ glimma.chart.scatterChart = function() {
 
 		function pxToNum(px) {
 			return +px.replace("px", "");
-		};
+		}
 
 		tooltipLeft = data.xJitter + xScale(xValue(data));
 		tooltipLeft += margin.left + margin.right;
