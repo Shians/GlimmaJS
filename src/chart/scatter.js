@@ -522,22 +522,24 @@ glimma.chart.scatterChart = function() {
 			}
 		}
 
+		container.select(".tooltip")
+					.style("opacity", 1)
+
 		function pxToNum(px) {
 			return +px.replace("px", "");
 		}
 
 		tooltipLeft = data.xJitter + xScale(xValue(data));
 		tooltipLeft += margin.left + margin.right;
-		tooltipLeft += pxToNum(container.select("svg").style("margin-left"));
-
+		tooltipLeft += $(container.select("svg").node()).offset().left;
+		tooltipLeft -= $(container.node()).offset().left;
+		
 		tooltipTop = data.yJitter + yScale(yValue(data));
-		tooltipTop += margin.top + container.select("svg").node().offsetTop;
-		tooltipTop -= 3 + container.select(".tooltip").node().offsetHeight;
+		tooltipTop += margin.top + $(container.select("svg").node()).offset().top;
+		tooltipTop -= 3 + $(container.select(".tooltip").node()).outerHeight();
 		tooltipTop = tooltipTop < 0 ? 0 : tooltipTop;
-					 
 
 		container.select(".tooltip")
-					.style("opacity", 1)
 					.style("left", tooltipLeft + "px")
 					.style("top", tooltipTop + "px");
 	}
