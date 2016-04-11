@@ -533,14 +533,16 @@ glimma.chart.scatterChart = function() {
 		tooltipLeft += margin.left + margin.right;
 		tooltipLeft += $(container.select("svg").node()).offset().left;
 		tooltipLeft -= $(container.node()).offset().left;
+		// Seperated from top style call so text height is calculated after proper
+		// line wrapping.
+		container.select(".tooltip")
+					.style("left", tooltipLeft + "px");
 		
 		tooltipTop = data.yJitter + yScale(yValue(data));
 		tooltipTop += margin.top + $(container.select("svg").node()).offset().top;
 		tooltipTop -= 3 + $(container.select(".tooltip").node()).outerHeight();
 		tooltipTop = tooltipTop < 0 ? 0 : tooltipTop;
-
 		container.select(".tooltip")
-					.style("left", tooltipLeft + "px")
 					.style("top", tooltipTop + "px");
 	}
 
