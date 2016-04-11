@@ -10,6 +10,11 @@ glimma.init.initialise = function() {
 				glimma.storage.charts[i].col(temp)
 										.fixedCol(true);
 
+				glimma.storage.chartData[i] = glimma.storage.chartData[i].map(function (d, i) {
+					d._uid = i;
+					return d;
+				});
+
 				d3.select(".glimma-plot.available")
 					.datum(glimma.storage.chartData[i])
 					.call(glimma.storage.charts[i]);

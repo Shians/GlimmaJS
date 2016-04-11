@@ -1,4 +1,5 @@
 require("./chart");
 
-require("./scatter");
 require("./bar");
+require("./scatter");
+require("./table");
