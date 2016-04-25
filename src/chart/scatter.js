@@ -638,6 +638,19 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.highlightById = function(id) {
+		var selectedData = data.filter(function (d) {
+			return (d._uid === id);
+		});
+
+		if (selectedData.length !== 0) {
+			dispatcher.hover(selectedData[0]);
+		} else {
+			console.log("Not found");
+		}
+		return chart;
+	};
+
 	chart.rescale = function(extent) {
 		_rescale(extent);
 		return chart;
