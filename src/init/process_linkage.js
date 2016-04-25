@@ -3,15 +3,15 @@
 glimma.init.processLinkages = function () {
 	for (var i = 0; i < glimma.storage.linkage.length; i++) {
 		// Closure to retain the indices
-		(function () { 
+		(function () {
 			var from = glimma.storage.linkage[i].from - 1;
 			var to = glimma.storage.linkage[i].to - 1;
 
 			var flag = glimma.storage.linkage[i].flag;
-			
+
 			// Special mds linkage
-			if (flag === "mds") { 
-				glimma.storage.charts[from].on("click", 
+			if (flag === "mds") {
+				glimma.storage.charts[from].on("click",
 					function (d) {
 						if (d.name < glimma.storage.chartInfo[from].info.dims) {
 							(function () {
@@ -29,7 +29,7 @@ glimma.init.processLinkages = function () {
 									.ylab(tmpstr4)
 									.tooltip(old.concat([tmpstr1, tmpstr3]));
 							}());
-							glimma.storage.charts[to].refresh();	
+							glimma.storage.charts[to].refresh();
 						}
 					}
 				);
@@ -73,7 +73,7 @@ glimma.init.processLinkages = function () {
 														.tooltip(["Sample", updateKey])
 														.refresh()
 														.show();
-						});	
+						});
 					} else {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 							if (!glimma.storage.charts[from].holdTooltip()) {
@@ -85,10 +85,17 @@ glimma.init.processLinkages = function () {
 															.refresh()
 															.show();
 							}
-						});	
+						});
 					}
 				}
+			// Table linkage
+			} else if (flag === "tablink") {
+				var src = glimma.storage.linkage[i].src;
+				var dest = glimma.storage.linkage[i].dest;
 
+				glimma.storage.tables[from].on(src + ".chart" + from, function (d) {
+					glimma.storage.charts[to][dest](d);
+				});
 			// Default linkage
 			} else {
 				var src = glimma.storage.linkage[i].src;
@@ -104,9 +111,9 @@ glimma.init.processLinkages = function () {
 				} else {
 					glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 						glimma.storage.charts[to][dest](d);
-					});	
+					});
 				}
 			}
 		}());
-	}	
+	}
 };
