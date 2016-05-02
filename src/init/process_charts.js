@@ -28,6 +28,18 @@ glimma.init.processCharts = function() {
 		d3.select(".glimma-plot.available")
 					.datum(glimma.storage.chartData[i])
 					.call(glimma.storage.charts[i]);
+
+		if (chartInfo.disableClick) {
+			chart.on("click", null);
+		}
+
+		if (chartInfo.disableHover) {
+			chart.on("hover", null);
+		}
+
+		if (chartInfo.disableZoom) {
+			chart.enableBrush(false);
+		}
 	}
 
 	function processMD(i) {
