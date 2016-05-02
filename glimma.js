@@ -54271,49 +54271,55 @@ window.glimma = {
 require("./glimma");
 require("./init");
 
-require("./initialise");
+require("./process_charts");
 require("./process_linkage");
 require("./process_inputs");
 require("./process_tables");
-},{"./glimma":29,"./init":31,"./initialise":32,"./process_inputs":33,"./process_linkage":34,"./process_tables":35}],31:[function(require,module,exports){
+},{"./glimma":29,"./init":31,"./process_charts":32,"./process_inputs":33,"./process_linkage":34,"./process_tables":35}],31:[function(require,module,exports){
 window.glimma.init = {};
 },{}],32:[function(require,module,exports){
 // Cycle through constructed plots
-glimma.init.initialise = function() {
+glimma.init.processCharts = function() {
 	if (d3.select(".glimma-plot.available").node()) {
 		for (var i = 0; i < glimma.storage.chartInfo.length; i++) {
 			var chartInfo = glimma.storage.chartInfo[i];
 
+			glimma.storage.chartData[i] = glimma.storage.chartData[i].map(function (d, i) {
+				d._uid = i;
+				return d;
+			});
+
 			// MD Plot initialisation
 			if (chartInfo.flag === "mdplot") {
-				var temp = function (d) { return d.col; };
-				glimma.storage.charts[i].col(temp)
-										.fixedCol(true);
-
-				glimma.storage.chartData[i] = glimma.storage.chartData[i].map(function (d, i) {
-					d._uid = i;
-					return d;
-				});
-
-				d3.select(".glimma-plot.available")
-					.datum(glimma.storage.chartData[i])
-					.call(glimma.storage.charts[i]);
+				processMD(i);
 			// Default initialisation
 			} else {
-				d3.select(".glimma-plot.available")
-					.datum(glimma.storage.chartData[i])
-					.call(glimma.storage.charts[i]);
+				processDefault(i);
 			}
 
 			// Hide plots if required
-			if (chartInfo.hide === "TRUE") {
+			if (chartInfo.hide) {
 				glimma.storage.charts[i].hide();
 			}
 		}
 	}
+
+	function processDefault(i) {
+		d3.select(".glimma-plot.available")
+					.datum(glimma.storage.chartData[i])
+					.call(glimma.storage.charts[i]);
+	}
+
+	function processMD(i) {
+		var temp = function (d) { return d.col; };
+		glimma.storage.charts[i].col(temp)
+								.fixedCol(true);
+
+		processDefault(i);
+	}
 };
 
-glimma.init.initialize = glimma.init.initialise;
+
 },{}],33:[function(require,module,exports){
 // Function to process the inputs at initialisation
 
