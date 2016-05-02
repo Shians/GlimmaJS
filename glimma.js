@@ -53478,7 +53478,7 @@ glimma.chart.scatterChart = function() {
 		cScale = d3.scale.category10(),
 		cFixed = false,
 		holdTooltip = false,
-		tooltipData = {}, 
+		tooltipData = {},
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
 
@@ -53541,7 +53541,7 @@ glimma.chart.scatterChart = function() {
 				xScale.domain(data.map(xValue).unique())
 					.rangePoints([0, width - margin.left - margin.right], 1);
 			}
-			
+
 			if (yOrd) {
 				yScale.domain(data.map(yValue).unique())
 					.rangePoints([height - margin.top - margin.bottom, 0], 1);
@@ -53580,7 +53580,7 @@ glimma.chart.scatterChart = function() {
 						.style("opacity", 0)
 						.style("pointer-events", "none")
 						.style("left", xScale.range()[1] + "px");
-			}   
+			}
 		}
 
 		function createBrush() {
@@ -53598,7 +53598,7 @@ glimma.chart.scatterChart = function() {
 			}
 		}
 
-		function bindData() {   
+		function bindData() {
 			// Bind data to SVG if it exists
 			svg = selection.selectAll("svg").data([data]);
 		}
@@ -53616,7 +53616,7 @@ glimma.chart.scatterChart = function() {
 			gEnter.append("g").attr("class", "front"); // front layer
 			if (container.select(".tooltip").node() === null) {
 				container.append("div").attr("class", "tooltip").style("opacity", 0); // tooltip
-			} 
+			}
 			// Update the inner dimensions.
 			svg.select("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -53645,7 +53645,7 @@ glimma.chart.scatterChart = function() {
 										.selectAll("circle")
 										.data(data, function(d) { return [xValue(d), yValue(d)]; });
 			}
-			
+
 			// Remove data points that no longer exist
 			cirContainer.exit()
 						.remove();
@@ -53670,7 +53670,7 @@ glimma.chart.scatterChart = function() {
 							.attr("cy", function (d) { return d.yJitter + yScale(yValue(d)); });
 			}
 		}
-		
+
 		function drawAxis() {
 			var tallTextOffset = 6;
 
@@ -53823,7 +53823,7 @@ glimma.chart.scatterChart = function() {
 		if (temp.length === tooltip.length) {
 			tooltipAlt = temp;
 		}
-		return chart;	
+		return chart;
 	};
 
 	chart.data = function(_) {
@@ -53913,26 +53913,12 @@ glimma.chart.scatterChart = function() {
 	};
 
 	//* Internal Functions *//
-	function _highlight(data) {
-		var c = front.select("circle"); 
-		if (c[0][0] === null) {
-			c = front.append("circle");
-		}
-
-		c.attr("cx", data.xJitter + xScale(xValue(data)))
-			.attr("cy", data.yJitter + yScale(yValue(data)))
-			.attr("r", sizeValue(data) + 2)
-			.style("opacity", 1)
-			.style("stroke", "white")
-			.style("fill", cScale(cValue(data)));
+	function _deselect() {
+		_hideTooltip();
+		_lowlight();
+		holdTooltip = false;
 	}
 
-	function _lowlight() {
-		front.selectAll("circle")
-				.style("opacity", 0);
-	}
-
-	//* Helper Functions *//
 	function _scaled_extent(data, key, factor) {
 		factor = typeof factor !== "undefined" ? factor : 0.02;
 		extent = d3.extent(data, key);
@@ -53989,7 +53975,7 @@ glimma.chart.scatterChart = function() {
 		// line wrapping.
 		container.select(".tooltip")
 					.style("left", tooltipLeft + "px");
-		
+
 		tooltipTop = data.yJitter + yScale(yValue(data));
 		tooltipTop += margin.top + $(container.select("svg").node()).offset().top;
 		tooltipTop -= 3 + $(container.select(".tooltip").node()).outerHeight();
@@ -54001,13 +53987,32 @@ glimma.chart.scatterChart = function() {
 	function _hideTooltip() {
 		container.select(".tooltip")
 					.style("opacity", 0);
+		tooltipData = {};
+	}
+
+	function _highlight(data) {
+		var c = front.select("circle");
+		if (c[0][0] === null) {
+			c = front.append("circle");
+		}
+
+		c.attr("cx", data.xJitter + xScale(xValue(data)))
+			.attr("cy", data.yJitter + yScale(yValue(data)))
+			.attr("r", sizeValue(data) + 2)
+			.style("opacity", 1)
+			.style("stroke", "white")
+			.style("fill", cScale(cValue(data)));
+	}
+
+	function _lowlight() {
+		front.selectAll("circle")
+				.style("opacity", 0);
 	}
 
 	function _rescale(brushExtent) {
 		var newData = container.data()[0].filter(function (d) { return _withinBrush(d, brushExtent); });
 		if (newData.length > 0) {
-			_hideTooltip();
-			_lowlight();
+			_deselect();
 			container.select(".reset-button").style("opacity", 1).style("pointer-events", "auto");
 			chart.data(newData);
 			chart.extent({"x": [brushExtent[0][0], brushExtent[1][0]], "y": [brushExtent[0][1], brushExtent[1][1]]});
@@ -54016,8 +54021,7 @@ glimma.chart.scatterChart = function() {
 	}
 
 	function _resetScale() {
-		_hideTooltip();
-		_lowlight();
+		_deselect();
 		chart.data(container.data()[0]);
 		container.select(".reset-button").style("opacity", 0).style("pointer-events", "none");
 		extent = null;
@@ -54028,7 +54032,7 @@ glimma.chart.scatterChart = function() {
 		var x = xValue(point),
 			y = yValue(point);
 
-		return (x >= extent[0][0] && 
+		return (x >= extent[0][0] &&
 				x <= extent[1][0] &&
 				y >= extent[0][1] &&
 				y <= extent[1][1]);
@@ -54038,31 +54042,13 @@ glimma.chart.scatterChart = function() {
 		var x = xValue(point),
 			y = yValue(point);
 
-		return (x >= extent.x[0] && 
+		return (x >= extent.x[0] &&
 				x <= extent.x[1] &&
 				y >= extent.y[0] &&
 				y <= extent.y[1]);
 	}
 
 	//* Public Interactions *//
-	chart.hover = function(data) {
-		if (_withinExtent(data, extent) || xOrd || yOrd) {
-			_highlight(data);
-			_showTooltip(data);	
-		}
-		return chart;
-	};
-
-	chart.leave = function(data) {
-		if (!holdTooltip) {
-			if (_withinExtent(data, extent) || xOrd || yOrd) {
-				_hideTooltip();
-				_lowlight();	
-			}
-		}
-		return chart;
-	};
-
 	chart.click = function(data) {
 		if (JSON.stringify(data) === JSON.stringify(tooltipData)) {
 			chart.holdTooltip(false);
@@ -54077,18 +54063,9 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
-	chart.highlightBySearch = function(query) {
-		var selectedData = data.filter(function (d) {
-			return (searchValue(d) === query);
-		});
-
-		if (selectedData.length !== 0) {
-			dispatcher.hover(selectedData[0]);
-		} else {
-			console.log("Not found");
-		}
-		return chart;
-	};
+	chart.deselect = function() {
+		_deselect();
+	}
 
 	chart.highlightById = function(id) {
 		var selectedData = data.filter(function (d) {
@@ -54096,6 +54073,7 @@ glimma.chart.scatterChart = function() {
 		});
 
 		if (selectedData.length !== 0) {
+			_deselect();
 			dispatcher.hover(selectedData[0]);
 		} else {
 			console.log("Not found");
@@ -54103,13 +54081,40 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
-	chart.rescale = function(extent) {
-		_rescale(extent);
+	chart.highlightBySearch = function(query) {
+		var selectedData = data.filter(function (d) {
+			return (searchValue(d) === query);
+		});
+
+		if (selectedData.length !== 0) {
+			_deselect();
+			dispatcher.hover(selectedData[0]);
+		} else {
+			console.log("Not found");
+		}
 		return chart;
 	};
 
-	chart.update = function() {
-		container.call(chart);
+	chart.hide = function () {
+		container.style("display", "none");
+		return chart;
+	};
+
+	chart.hover = function(data) {
+		if (_withinExtent(data, extent) || xOrd || yOrd) {
+			_highlight(data);
+			_showTooltip(data);
+		}
+		return chart;
+	};
+
+	chart.leave = function(data) {
+		if (!holdTooltip) {
+			if (_withinExtent(data, extent) || xOrd || yOrd) {
+				_hideTooltip();
+				_lowlight();
+			}
+		}
 		return chart;
 	};
 
@@ -54119,8 +54124,8 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
-	chart.hide = function () {
-		container.style("display", "none");
+	chart.rescale = function(extent) {
+		_rescale(extent);
 		return chart;
 	};
 
@@ -54131,8 +54136,13 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.update = function() {
+		container.call(chart);
+		return chart;
+	};
+
 	d3.rebind(chart, dispatcher, "on");
-	
+
 	return chart;
 };
 
