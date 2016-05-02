@@ -28,7 +28,8 @@ glimma.chart.scatterChart = function() {
 		holdTooltip = false,
 		tooltipData = {},
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
-		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
+		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0),
+		enableBrush = true;
 
 	var dispatcher = d3.dispatch("hover", "leave", "click"),
 		container,
@@ -56,7 +57,7 @@ glimma.chart.scatterChart = function() {
 		createBrush();
 		bindData();
 		drawSkeleton();
-		if (!xOrd && !yOrd) {
+		if (!xOrd && !yOrd && enableBrush) {
 			drawBrush();
 		}
 		drawPoints();
@@ -460,6 +461,12 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.enableBrush = function(_) {
+		if (!arguments.length) return enableBrush;
+		if (typeof _ === "boolean") enableBrush = _;
+		return chart;
+	};
+
 	//* Internal Functions *//
 	function _deselect() {
 		_hideTooltip();
@@ -509,7 +516,7 @@ glimma.chart.scatterChart = function() {
 		}
 
 		container.select(".tooltip")
-					.style("opacity", 1)
+					.style("opacity", 1);
 
 		function pxToNum(px) {
 			return +px.replace("px", "");
@@ -613,7 +620,7 @@ glimma.chart.scatterChart = function() {
 
 	chart.deselect = function() {
 		_deselect();
-	}
+	};
 
 	chart.highlightById = function(id) {
 		var selectedData = data.filter(function (d) {
@@ -667,6 +674,7 @@ glimma.chart.scatterChart = function() {
 	};
 
 	chart.refresh = function () {
+		_deselect();
 		extent = null;
 		container.call(chart);
 		return chart;
