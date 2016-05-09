@@ -53477,6 +53477,7 @@ glimma.chart.scatterChart = function() {
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
 		cFixed = false,
+		colRefresh = false,
 		holdTooltip = false,
 		tooltipData = {},
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
@@ -53550,8 +53551,9 @@ glimma.chart.scatterChart = function() {
 
 			if (cFixed) {
 				cScale = function (d) { return d; };
-			} else if (cScale.domain() == []) {
-				cScale.domain(data.map(function (d) { return cValue(d); }).unique()); //TODO: Allow fill with cValue without mapping
+			} else if ((cScale.domain() == []) || colRefresh) {
+				cScale.domain(data.map(function (d) { return cValue(d); }).unique());
+				colRefresh = false;
 			}
 		}
 
@@ -53656,10 +53658,12 @@ glimma.chart.scatterChart = function() {
 						.append("circle")
 						.attr("class", "point")
 						.attr("r", function (d) { return sizeValue(d); })
-						.style("fill", function (d) { return cScale(cValue(d)); })
 						.on("click", function (d) { dispatcher.click(d); })
 						.on("mouseover", function (d) { dispatcher.hover(d); })
 						.on("mouseout", function (d) { dispatcher.leave(d); });
+
+			// Colour may change without new points
+			cirContainer.style("fill", function (d) { return cScale(cValue(d)); });
 
 			// Update positions
 			if (cirContainer.node().childElementCount < 2000) {
@@ -53806,6 +53810,7 @@ glimma.chart.scatterChart = function() {
 	chart.col = function(_) {
 		if (!arguments.length) return cValue;
 		cValue = _;
+		colRefresh = true;
 		return chart;
 	};
 
@@ -54179,7 +54184,7 @@ glimma.chart.table = function() {
 					select: { style: "single" },
 					pagingType: "full_numbers"
 				},
-		dispatcher = d3.dispatch("click", "keyup");
+		dispatcher = d3.dispatch("click");
 
 	function table(selection) {
 		var tab = $(selection.node()).DataTable(tableData);
@@ -54417,6 +54422,53 @@ glimma.init.processLinkages = function () {
 						}
 					}
 				);
+
+				// Direct selection only because we know this is an MDS plot
+				d3.select("div.col-md-6:nth-child(2)")
+								.append("h4")
+								.style("text-align", "center")
+								.classed("row", true)
+								.text("MDS Colour Group");
+
+				var row = d3.select("div.col-md-6:nth-child(2)")
+								.append("div")
+								.style("text-align", "center")
+								.classed("row", true);
+
+				var ul = row.append("ul")
+							.attr("class", "nav nav-pills")
+							.style("display", "inline-block");
+
+				var content = d3.select("div.col-md-6:nth-child(2)")
+								.append("div")
+								.style("text-align", "center")
+								.classed("row", true);
+
+				var gNames = glimma.storage.chartInfo[0].info.groupsNames;
+
+				// Only first pill is active
+				ul.append("li")
+						.attr("class", "active")
+						.append("a")
+						.attr("data-toggle", "pill")
+						.text(gNames[0])
+						.style("cursor", "pointer")
+						.on("click", function (d) {
+							var colgroup = this.innerHTML;
+							glimma.storage.charts[0].col(function(d) { return d[colgroup]; }).refresh();
+						});
+
+				for (var j = 1; j < gNames.length; j++) {
+					ul.append("li")
+						.append("a")
+						.attr("data-toggle", "pill")
+						.text(gNames[j])
+						.style("cursor", "pointer")
+						.on("click", function (d) {
+							var colgroup = this.innerHTML;
+							glimma.storage.charts[0].col(function(d) { return d[colgroup]; }).refresh();
+						});
+				}
 			} else if (flag === "byKey") {
 				var src = glimma.storage.linkage[i].src;
 				var dest = glimma.storage.linkage[i].dest;
