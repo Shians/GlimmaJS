@@ -25,6 +25,7 @@ glimma.chart.scatterChart = function() {
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
 		cFixed = false,
+		colRefresh = false,
 		holdTooltip = false,
 		tooltipData = {},
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
@@ -98,8 +99,9 @@ glimma.chart.scatterChart = function() {
 
 			if (cFixed) {
 				cScale = function (d) { return d; };
-			} else if (cScale.domain() == []) {
-				cScale.domain(data.map(function (d) { return cValue(d); }).unique()); //TODO: Allow fill with cValue without mapping
+			} else if ((cScale.domain() == []) || colRefresh) {
+				cScale.domain(data.map(function (d) { return cValue(d); }).unique());
+				colRefresh = false;
 			}
 		}
 
@@ -204,10 +206,12 @@ glimma.chart.scatterChart = function() {
 						.append("circle")
 						.attr("class", "point")
 						.attr("r", function (d) { return sizeValue(d); })
-						.style("fill", function (d) { return cScale(cValue(d)); })
 						.on("click", function (d) { dispatcher.click(d); })
 						.on("mouseover", function (d) { dispatcher.hover(d); })
 						.on("mouseout", function (d) { dispatcher.leave(d); });
+
+			// Colour may change without new points
+			cirContainer.style("fill", function (d) { return cScale(cValue(d)); });
 
 			// Update positions
 			if (cirContainer.node().childElementCount < 2000) {
@@ -354,6 +358,7 @@ glimma.chart.scatterChart = function() {
 	chart.col = function(_) {
 		if (!arguments.length) return cValue;
 		cValue = _;
+		colRefresh = true;
 		return chart;
 	};
 
@@ -695,6 +700,20 @@ glimma.chart.scatterChart = function() {
 	chart.update = function() {
 		container.call(chart);
 		return chart;
+	};
+
+	chart.colorScale = function() {
+		var dom = cScale.domain();
+		var cols = dom.map(function (d) { return cScale(d); });
+		function zip(a, b) {
+			var out = [];
+			if (a.length === b.length) {
+				for (var i = 0; i < a.length; i++) {
+					out.push([dom[i], cols[i]]);
+				}
+			}
+		}
+		return out;
 	};
 
 	d3.rebind(chart, dispatcher, "on");
