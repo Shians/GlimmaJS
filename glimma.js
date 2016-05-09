@@ -54149,6 +54149,20 @@ glimma.chart.scatterChart = function() {
 		return chart;
 	};
 
+	chart.colorScale = function() {
+		var dom = cScale.domain();
+		var cols = dom.map(function (d) { return cScale(d); });
+		function zip(a, b) {
+			var out = [];
+			if (a.length === b.length) {
+				for (var i = 0; i < a.length; i++) {
+					out.push([dom[i], cols[i]]);
+				}
+			}
+		}
+		return out;
+	};
+
 	d3.rebind(chart, dispatcher, "on");
 
 	return chart;
@@ -54160,13 +54174,12 @@ glimma.chart.scatterChart = function() {
  * @return {function} returned function can be called on a d3 selection to create table
  */
 glimma.chart.table = function() {
-
 	var tableData = { 
 					table: "display",
 					select: { style: "single" },
 					pagingType: "full_numbers"
 				},
-		dispatcher = d3.dispatch("click");
+		dispatcher = d3.dispatch("click", "keyup");
 
 	function table(selection) {
 		var tab = $(selection.node()).DataTable(tableData);
@@ -54384,7 +54397,7 @@ glimma.init.processLinkages = function () {
 			if (flag === "mds") {
 				glimma.storage.charts[from].on("click",
 					function (d) {
-						if (d.name < glimma.storage.chartInfo[from].info.dims) {
+						if (d.name < Math.min(8, glimma.storage.chartInfo[from].info.dims)) {
 							(function () {
 								var tmpstr1 = "dim" + d.name;
 								var tmpstr2 = "Dimension " + d.name;

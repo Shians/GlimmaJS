@@ -3,7 +3,6 @@
  * @return {function} returned function can be called on a d3 selection to create table
  */
 glimma.chart.table = function() {
-
 	var tableData = { 
 					table: "display",
 					select: { style: "single" },
