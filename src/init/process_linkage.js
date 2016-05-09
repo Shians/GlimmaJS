@@ -13,7 +13,7 @@ glimma.init.processLinkages = function () {
 			if (flag === "mds") {
 				glimma.storage.charts[from].on("click",
 					function (d) {
-						if (d.name < glimma.storage.chartInfo[from].info.dims) {
+						if (d.name < Math.min(8, glimma.storage.chartInfo[from].info.dims)) {
 							(function () {
 								var tmpstr1 = "dim" + d.name;
 								var tmpstr2 = "Dimension " + d.name;
