@@ -154,3 +154,7 @@ svg.plot-svg
 
     background: #fff;
 }
+
+.clickable {
+    cursor: pointer;
+}
