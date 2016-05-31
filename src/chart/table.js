@@ -10,14 +10,18 @@ glimma.chart.table = function() {
 				},
 		dispatcher = d3.dispatch("click");
 
+	var tab;
+
 	function table(selection) {
-		var tab = $(selection.node()).DataTable(tableData);
+		tab = $(selection.node()).DataTable(tableData);
 		
 		tab.on("click", function (e, dt, type, indexes) {
 			dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
 		});
 
 		selection.classed("available", false);
+
+		return tab;
 	}
 
 	// No internal actions required yet, highlighting handled by select addon for DataTables
@@ -30,7 +34,7 @@ glimma.chart.table = function() {
 	};
 
 	table.columns = function(_) {
-		if (!arguments.length) return tableData.columns.map(function (d) { return d.title });
+		if (!arguments.length) return tableData.columns.map(function (d) { return d.title; });
 
 		var mapFun = function(d) {
 			if (d.search("\\." !== -1)) {
@@ -44,12 +48,11 @@ glimma.chart.table = function() {
 		return table;
 	};
 
-	// No internal actions required yet, highlighting handled by select addon for DataTables
-	// table.click = function(id) {
-	// 	console.log(id);
-	// };
+	table.click = function() {
+		dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
+	};
 	
 	d3.rebind(table, dispatcher, "on");
 
 	return table;
-}
+};
