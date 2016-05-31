@@ -53390,14 +53390,14 @@ glimma.chart.barChart = function() {
 			tooltip.html(glimma.math.round(yValue(data), ndigits));
 		}
 
-		var ttWidth = tooltip.node().offsetWidth,
-			ttHeight = tooltip.node().offsetHeight,
+		var ttWidth = $(tooltip.node()).outerWidth(),
+			ttHeight = $(tooltip.node()).outerHeight(),
 			floatOffset = 3;
 
-		var tooltipTop = yScale(yValue(data)) + container.select("svg").node().offsetTop;
+		var tooltipTop = yScale(yValue(data)) + $(container.select("svg").node()).offset().top;
 		tooltipTop += margin.top - ttHeight - floatOffset;
 
-		var tooltipLeft = xScale(nValue(data)) + container.select("svg").node().offsetLeft;
+		var tooltipLeft = xScale(nValue(data)) + $(container.select("svg").node()).offset().left;
 		tooltipLeft += margin.left + (xScale.rangeBand() - ttWidth) / 2;
 
 		// TODO, Top positioning might be unreliable.
@@ -54186,14 +54186,18 @@ glimma.chart.table = function() {
 				},
 		dispatcher = d3.dispatch("click");
 
+	var tab;
+
 	function table(selection) {
-		var tab = $(selection.node()).DataTable(tableData);
+		tab = $(selection.node()).DataTable(tableData);
 		
 		tab.on("click", function (e, dt, type, indexes) {
 			dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
 		});
 
 		selection.classed("available", false);
+
+		return tab;
 	}
 
 	// No internal actions required yet, highlighting handled by select addon for DataTables
@@ -54206,7 +54210,7 @@ glimma.chart.table = function() {
 	};
 
 	table.columns = function(_) {
-		if (!arguments.length) return tableData.columns.map(function (d) { return d.title });
+		if (!arguments.length) return tableData.columns.map(function (d) { return d.title; });
 
 		var mapFun = function(d) {
 			if (d.search("\\." !== -1)) {
@@ -54220,15 +54224,14 @@ glimma.chart.table = function() {
 		return table;
 	};
 
-	// No internal actions required yet, highlighting handled by select addon for DataTables
-	// table.click = function(id) {
-	// 	console.log(id);
-	// };
+	table.click = function() {
+		dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
+	};
 	
 	d3.rebind(table, dispatcher, "on");
 
 	return table;
-}
+};
 
 },{}],25:[function(require,module,exports){
 require("./math.js");
@@ -54423,51 +54426,53 @@ glimma.init.processLinkages = function () {
 					}
 				);
 
-				// Direct selection only because we know this is an MDS plot
-				d3.select("div.col-md-6:nth-child(2)")
-								.append("h4")
-								.style("text-align", "center")
-								.classed("row", true)
-								.text("MDS Colour Group");
-
-				var row = d3.select("div.col-md-6:nth-child(2)")
-								.append("div")
-								.style("text-align", "center")
-								.classed("row", true);
-
-				var ul = row.append("ul")
-							.attr("class", "nav nav-pills")
-							.style("display", "inline-block");
-
-				var content = d3.select("div.col-md-6:nth-child(2)")
-								.append("div")
-								.style("text-align", "center")
-								.classed("row", true);
-
 				var gNames = glimma.storage.chartInfo[0].info.groupsNames;
 
-				// Only first pill is active
-				ul.append("li")
-						.attr("class", "active")
-						.append("a")
-						.attr("data-toggle", "pill")
-						.text(gNames[0])
-						.style("cursor", "pointer")
-						.on("click", function (d) {
-							var colgroup = this.innerHTML;
-							glimma.storage.charts[0].col(function(d) { return d[colgroup]; }).refresh();
-						});
+				if (typeof gNames === "object") {
+					// Direct selection only because we know this is an MDS plot
+					d3.select("div.col-md-6:nth-child(2)")
+									.append("h4")
+									.style("text-align", "center")
+									.classed("row", true)
+									.text("MDS Colour Group");
 
-				for (var j = 1; j < gNames.length; j++) {
+					var row = d3.select("div.col-md-6:nth-child(2)")
+									.append("div")
+									.style("text-align", "center")
+									.classed("row", true);
+
+					var ul = row.append("ul")
+								.attr("class", "nav nav-pills")
+								.style("display", "inline-block");
+
+					var content = d3.select("div.col-md-6:nth-child(2)")
+									.append("div")
+									.style("text-align", "center")
+									.classed("row", true);
+
+					// Only first pill is active
 					ul.append("li")
-						.append("a")
-						.attr("data-toggle", "pill")
-						.text(gNames[j])
-						.style("cursor", "pointer")
-						.on("click", function (d) {
-							var colgroup = this.innerHTML;
-							glimma.storage.charts[0].col(function(d) { return d[colgroup]; }).refresh();
-						});
+							.attr("class", "active")
+							.append("a")
+							.attr("data-toggle", "pill")
+							.text(gNames[0])
+							.style("cursor", "pointer")
+							.on("click", function (d) {
+								var colgroup = this.innerHTML;
+								glimma.storage.charts[0].col(function(d) { return d[colgroup]; }).refresh();
+							});
+
+					for (var j = 1; j < gNames.length; j++) {
+						ul.append("li")
+							.append("a")
+							.attr("data-toggle", "pill")
+							.text(gNames[j])
+							.style("cursor", "pointer")
+							.on("click", function (d) {
+								var colgroup = this.innerHTML;
+								glimma.storage.charts[0].col(function(d) { return d[colgroup]; }).refresh();
+							});
+					}
 				}
 			} else if (flag === "byKey") {
 				var src = glimma.storage.linkage[i].src;
@@ -54560,8 +54565,22 @@ glimma.init.processLinkages = function () {
 glimma.init.processTables = function () {
 	for (var i = 0; i < glimma.storage.tables.length; i++) {
 		(function() {
+			// D3 selection, click event is bound to this.
 			var table = glimma.storage.tables[i];
-			table(d3.select("table.available"));
+			var sel = d3.select("table.available");
+			// Datatables object
+			var tab = table(sel);
+			
+			sel.selectAll("tbody>tr").classed("clickable", true);
+			d3.select(sel.node().parentNode).select("input")
+				.on("keyup.clicker", function(d) { 
+					if (d3.event.keyCode === 13) {
+						var rowSel  = tab.row(0, {page: "current"}).select();
+						if (rowSel.any) {
+							table.click();
+						}
+					}
+				});
 		}());
 	}
 };
