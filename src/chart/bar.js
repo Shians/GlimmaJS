@@ -267,14 +267,14 @@ glimma.chart.barChart = function() {
 			tooltip.html(glimma.math.round(yValue(data), ndigits));
 		}
 
-		var ttWidth = tooltip.node().offsetWidth,
-			ttHeight = tooltip.node().offsetHeight,
+		var ttWidth = $(tooltip.node()).outerWidth(),
+			ttHeight = $(tooltip.node()).outerHeight(),
 			floatOffset = 3;
 
-		var tooltipTop = yScale(yValue(data)) + container.select("svg").node().offsetTop;
+		var tooltipTop = yScale(yValue(data)) + $(container.select("svg").node()).offset().top;
 		tooltipTop += margin.top - ttHeight - floatOffset;
 
-		var tooltipLeft = xScale(nValue(data)) + container.select("svg").node().offsetLeft;
+		var tooltipLeft = xScale(nValue(data)) + $(container.select("svg").node()).offset().left;
 		tooltipLeft += margin.left + (xScale.rangeBand() - ttWidth) / 2;
 
 		// TODO, Top positioning might be unreliable.
