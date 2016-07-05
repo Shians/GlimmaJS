@@ -53480,8 +53480,16 @@ glimma.chart.scatterChart = function() {
 		colRefresh = false,
 		holdTooltip = false,
 		tooltipData = {},
+		xLog = false,
+		yLog = false,
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0),
+		xGrid = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
+		yGrid = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0),
+		xGridStep = null,
+		yGridStep = null,
+		xGridOn = false,
+		yGridOn = false,
 		enableBrush = true;
 
 	var dispatcher = d3.dispatch("hover", "leave", "click"),
@@ -53535,10 +53543,12 @@ glimma.chart.scatterChart = function() {
 		}
 
 		function createDimensions() {
-			extent = extent || {"x": _scaled_extent(data, xValue), "y": _scaled_extent(data, yValue)};
+			extent = extent || {"x": _scaled_extent(data, xValue, xLog ? 0 : 0.02), 
+								"y": _scaled_extent(data, yValue, yLog ? 0 : 0.02)};
 			// Scale initialisation
 			xScale.domain(extent.x).range([0, width - margin.left - margin.right]);
 			yScale.domain(extent.y).range([height - margin.top - margin.bottom, 0]);
+
 			if (xOrd) {
 				xScale.domain(data.map(xValue).unique())
 					.rangePoints([0, width - margin.left - margin.right], 1);
@@ -53607,16 +53617,25 @@ glimma.chart.scatterChart = function() {
 		}
 
 		function drawSkeleton() {
-			// Otherwise, create the skeletal chart.
+			// Create the skeletal chart.
 			var gEnter = svg.enter().append("svg").attr("class", "plot-svg").append("g");
+
 			gEnter.append("g").attr("class", "brush"); // brush
 			gEnter.append("g").attr("class", "brush-cover"); // brush
+
+			gEnter.append("g").attr("class", "x grid"); // x grid
+			gEnter.append("g").attr("class", "y grid"); // y grid
+
+			gEnter.append("g").attr("class", "circle-container"); // circle container
+
 			gEnter.append("g").attr("class", "x axis"); // x axis
 			gEnter.append("g").attr("class", "x label center-align"); // x label
+
 			gEnter.append("g").attr("class", "y axis"); // y axis
 			gEnter.append("g").attr("class", "y label center-align"); // x label
-			gEnter.append("g").attr("class", "circle-container"); // circle container
+
 			gEnter.append("g").attr("class", "front"); // front layer
+
 			if (container.select(".tooltip").node() === null) {
 				container.append("div").attr("class", "tooltip").style("opacity", 0); // tooltip
 			}
@@ -53684,8 +53703,29 @@ glimma.chart.scatterChart = function() {
 					.attr("transform", "translate(0," + yScale.range()[0] + ")")
 					.transition()
 					.call(xAxis);
+
+			if (xGridOn) {
+				if (xGridStep !== null) {
+					svg.select(".x.grid")
+						.attr("transform", "translate(0," + (height - margin.bottom - margin.top) + ")")
+						.call(xGrid
+							.tickSize(-(height - margin.bottom - margin.top), 0, 0)
+							.tickFormat("")
+						);
+				} else {
+					svg.select(".x.grid")
+						.attr("transform", "translate(0," + (height - margin.bottom - margin.top) + ")")
+						.call(xGrid
+							.tickSize(-(height - margin.bottom - margin.top), 0, 0)
+							.tickFormat("")
+						);
+				}
+			}
+
+			// Draw x label
 			var xLabSel = svg.select(".x.label");
 			if (xLabSel.node().childElementCount  === 0) {
+				// If no label container is present
 				xLabSel.append("text")
 						.attr("class", "label-text")
 						.attr("text-anchor", "middle")
@@ -53693,6 +53733,7 @@ glimma.chart.scatterChart = function() {
 						.attr("y", height - margin.top - tallTextOffset)
 						.html(xLabel);
 			} else {
+				// Update label
 				xLabSel.select("text")
 						.html(xLabel);
 			}
@@ -53701,8 +53742,29 @@ glimma.chart.scatterChart = function() {
 			svg.select(".y.axis")
 					.transition()
 					.call(yAxis);
+
+			if (yGridOn) {
+				if (yGridStep !== null) {
+					svg.select(".y.grid")
+					   .call(yGrid
+							.tickValues(glimma.rangeSpan(yGrid.scale().domain(), yGridStep))
+							.tickSize(-(width - margin.right - margin.left), 0, 0)
+							.tickFormat("")
+						);
+				} else {
+					svg.select(".y.grid")
+					   .call(yGrid
+							.tickSize(-(width - margin.right - margin.left), 0, 0)
+							.tickFormat("")
+						);
+				}
+
+			}
+
+			// Draw y label
 			var yLabSel = svg.select(".y.label");
 			if (yLabSel.node().childElementCount  === 0) {
+				// If no label container is present
 				yLabSel.attr("transform", "rotate(-90)")
 						.append("text")
 						.attr("class", "label-text")
@@ -53711,6 +53773,7 @@ glimma.chart.scatterChart = function() {
 						.attr("y", - (margin.left / 1.5))
 						.html(yLabel);
 			} else {
+				// Update label
 				yLabSel.select("text")
 						.html(yLabel);
 			}
@@ -53896,31 +53959,61 @@ glimma.chart.scatterChart = function() {
 
 	chart.xIsLog = function() {
 		xScale = d3.scale.log();
+		xScale.ticks(10, ",.2f");
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0);
+		xLog = true;
 		return chart;
 	};
 
 	chart.yIsLog = function() {
 		yScale = d3.scale.log();
+		yScale.ticks(10, ",.2f");
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
+		yLog = true;
 		return chart;
 	};
 
 	chart.xIsLinear = function() {
 		xScale = d3.scale.linear();
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0);
+		xLog = false;
 		return chart;
 	};
 
 	chart.yIsLinear = function() {
 		yScale = d3.scale.linear();
 		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
+		yLog = false;
 		return chart;
 	};
 
 	chart.enableBrush = function(_) {
 		if (!arguments.length) return enableBrush;
 		if (typeof _ === "boolean") enableBrush = _;
+		return chart;
+	};
+
+	chart.xGridOn = function(_) {
+		if (!arguments.length) return xGridOn;
+		if (typeof _ === "boolean") xGridOn = _;
+		return chart;
+	};
+
+	chart.yGridOn = function(_) {
+		if (!arguments.length) return yGridOn;
+		if (typeof _ === "boolean") yGridOn = _;
+		return chart;
+	};
+
+	chart.xGridStep = function(_) {
+		if (!arguments.length) return xGridStep;
+		if (typeof _ === "number") xGridStep = _;
+		return chart;
+	};
+
+	chart.yGridStep = function(_) {
+		if (!arguments.length) return yGridStep;
+		if (typeof _ === "number") yGridStep = _;
 		return chart;
 	};
 
@@ -54733,5 +54826,23 @@ glimma.layout.setupGrid = function(selection, type, dim) {
 	for (var i = 0; i < rows; i++) {
 		glimma.layout.setupRow(selection, sizes, type);
 	}
+};
+
+glimma.rangeSpan = function(interval, step) {
+	if (step != 0) {
+		var lower = step * Math.ceil(interval[0]/step),
+			upper = step * Math.floor(interval[1]/step);
+
+		output = [];
+
+		var nextval = lower;
+		while (nextval <= upper) {
+			output.push(nextval);
+			nextval += step;
+		}
+
+		return output
+	}
+	return -1
 };
 },{}]},{},[28]);
