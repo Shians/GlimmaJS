@@ -75,3 +75,21 @@ glimma.layout.setupGrid = function(selection, type, dim) {
 		glimma.layout.setupRow(selection, sizes, type);
 	}
 };
+
+glimma.rangeSpan = function(interval, step) {
+	if (step != 0) {
+		var lower = step * Math.ceil(interval[0]/step),
+			upper = step * Math.floor(interval[1]/step);
+
+		output = [];
+
+		var nextval = lower;
+		while (nextval <= upper) {
+			output.push(nextval);
+			nextval += step;
+		}
+
+		return output
+	}
+	return -1
+};
