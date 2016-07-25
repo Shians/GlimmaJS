@@ -241,12 +241,11 @@ glimma.chart.barChart = function() {
 
 	//* Internal Functions *//
 	function _highlight(data) {
-		_showTooltip(data);
+		
 	}
 
 	function _lowlight() {
-		container.select(".tooltip")
-					.style("opacity", 0);
+		
 	}
 
 	//* Helper Functions *//
@@ -287,6 +286,10 @@ glimma.chart.barChart = function() {
 	function _hideTooltip() {
 		container.select(".tooltip")
 					.style("opacity", 0);
+	}
+
+	function _colourise(name, col) {
+		container.selectAll(".bar")
 	}
 
 	//* Public Interactions *//

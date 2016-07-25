@@ -13,7 +13,7 @@ glimma.chart.scatterChart = function() {
 		searchValue = function (d) {return d.search; },
 		idMap = function (d) { return d; },
 		sizeValue = function () { return 2; }, //TODO: Maybe add size scale?
-		cValue = function () { return "black"; }, //TODO: Hex colour values
+		cValue = function () { return "black"; },
 		tooltip = ["x", "y"],
 		tooltipAlt = [],
 		titleValue = "",
@@ -59,18 +59,21 @@ glimma.chart.scatterChart = function() {
 			addJitter();
 		}
 		occupyContainer();
-		assignData();
-		createDimensions();
+		getData();
+		createScales();
+
 		drawTitle();
 		drawButtons();
-		createBrush();
-		bindData();
+
+		bindDataToSVG();
+
 		drawSkeleton();
 		if (!xOrd && !yOrd && enableBrush) {
 			drawBrush();
 		}
 		drawPoints();
 		drawAxis();
+
 		bindDispatcher();
 
 		function addJitter() {
@@ -86,11 +89,11 @@ glimma.chart.scatterChart = function() {
 			container.classed("available", false); // Mark plot window as occupied.
 		}
 
-		function assignData() {
+		function getData() {
 			data = data || selection.data()[0]; // Grab data from plot window
 		}
 
-		function createDimensions() {
+		function createScales() {
 			extent = extent || {"x": _scaled_extent(data, xValue, xLog ? 0 : 0.02),
 								"y": _scaled_extent(data, yValue, yLog ? 0 : 0.02)};
 			// Scale initialisation
@@ -144,22 +147,7 @@ glimma.chart.scatterChart = function() {
 			}
 		}
 
-		function createBrush() {
-			// Create brush object
-			brush = d3.svg.brush().x(xScale).y(yScale).on("brushend", _brushend);
-		}
-
-		// Brush function
-		function _brushend() {
-			_lowlight();
-			if (!brush.empty()) {
-				var extent = brush.extent();
-				svg.select(".brush").call(brush.clear());
-				_rescale(extent);
-			}
-		}
-
-		function bindData() {
+		function bindDataToSVG() {
 			// Bind data to SVG if it exists
 			svg = selection.selectAll("svg").data([data]);
 		}
@@ -198,10 +186,22 @@ glimma.chart.scatterChart = function() {
 		}
 
 		function drawBrush() {
+			// Create brush object
+			brush = d3.svg.brush().x(xScale).y(yScale).on("brushend", _brushend);
 			svg.select(".brush").call(brush);
 			svg.select("rect.extent")
 				.style("cursor", "crosshair")
 				.style("pointer-events", "none");
+
+			// Brush function
+			function _brushend() {
+				_lowlight();
+				if (!brush.empty()) {
+					var extent = brush.extent();
+					svg.select(".brush").call(brush.clear());
+					_rescale(extent);
+				}
+			}
 		}
 
 		function drawPoints() {
@@ -564,6 +564,14 @@ glimma.chart.scatterChart = function() {
 		if (typeof _ === "number") yGridStep = _;
 		return chart;
 	};
+
+	chart._xScale = function() {
+		return xScale;
+	}
+
+	chart._yScale = function() {
+		return yScale;
+	}
 
 	//* Internal Functions *//
 	function _deselect() {
