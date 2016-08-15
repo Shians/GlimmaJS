@@ -3,7 +3,7 @@
  * @return {function} returned function can be called on a d3 selection to create table
  */
 glimma.chart.table = function() {
-	var tableData = { 
+	var tableData = {
 					table: "display",
 					select: { style: "single" },
 					pagingType: "full_numbers"
@@ -14,7 +14,7 @@ glimma.chart.table = function() {
 
 	function table(selection) {
 		tab = $(selection.node()).DataTable(tableData);
-		
+
 		tab.on("click", function (e, dt, type, indexes) {
 			dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
 		});
@@ -51,7 +51,7 @@ glimma.chart.table = function() {
 	table.click = function() {
 		dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
 	};
-	
+
 	d3.rebind(table, dispatcher, "on");
 
 	return table;

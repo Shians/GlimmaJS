@@ -56034,7 +56034,7 @@ glimma.chart.scatterChart = function() {
  * @return {function} returned function can be called on a d3 selection to create table
  */
 glimma.chart.table = function() {
-	var tableData = { 
+	var tableData = {
 					table: "display",
 					select: { style: "single" },
 					pagingType: "full_numbers"
@@ -56045,7 +56045,7 @@ glimma.chart.table = function() {
 
 	function table(selection) {
 		tab = $(selection.node()).DataTable(tableData);
-		
+
 		tab.on("click", function (e, dt, type, indexes) {
 			dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
 		});
@@ -56082,7 +56082,7 @@ glimma.chart.table = function() {
 	table.click = function() {
 		dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
 	};
-	
+
 	d3.rebind(table, dispatcher, "on");
 
 	return table;
@@ -56339,7 +56339,7 @@ glimma.init.processLinkages = function () {
 				if (dest === "xChange") {
 					if (src === "click") {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
-							var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+							var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 							glimma.storage.charts[to].x(function (d) { return d[updateKey]; })
 														.title(String(d[key]))
@@ -56350,7 +56350,7 @@ glimma.init.processLinkages = function () {
 					} else {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 							if (!glimma.storage.charts[from].holdTooltip()) {
-								var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+								var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 								glimma.storage.charts[to].x(function (d) { return d[updateKey]; })
 															.title(String(d[key]))
@@ -56363,7 +56363,7 @@ glimma.init.processLinkages = function () {
 				} else if (dest === "yChange") {
 					if (src === "click") {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
-							var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+							var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 							glimma.storage.charts[to].y(function (d) { return d[updateKey]; })
 														.title(String(d[key]))
@@ -56374,7 +56374,7 @@ glimma.init.processLinkages = function () {
 					} else {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 							if (!glimma.storage.charts[from].holdTooltip()) {
-								var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+								var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 								glimma.storage.charts[to].y(function (d) { return d[updateKey]; })
 															.title(String(d[key]))
@@ -56531,7 +56531,7 @@ glimma.layout.bsAddRow = function(selection) {
  */
 glimma.layout.bsAddCol = function(selection, size, type) {
 	if (typeof type === "undefined") {
-		var type = "md";
+		type = "md";
 	}
 	var col = selection.append("div").attr("class", "col-" + type + "-" + size);
 	return col;
@@ -56555,7 +56555,7 @@ glimma.layout.addPlottableWindow = function(selection) {
  */
 glimma.layout.setupRow = function(selection, sizes, type) {
 	if (typeof type === "undefined") {
-		var type = "md";
+		type = "md";
 	}
 	var arrSum = function (array) {
 		return array.reduce(function (a, b) { return a + b; });
@@ -56573,6 +56573,8 @@ glimma.layout.setupRow = function(selection, sizes, type) {
 };
 
 glimma.layout.setupGrid = function(selection, type, dim) {
+	var i;
+
 	var rows = +dim[0],
 		cols = +dim[1],
 		size = Math.floor(12 / cols),
@@ -56582,17 +56584,17 @@ glimma.layout.setupGrid = function(selection, type, dim) {
 		return null;
 	}
 
-	for (var i = 0; i < cols; i++) {
+	for (i = 0; i < cols; i++) {
 		sizes.push(size);
 	}
 
-	for (var i = 0; i < rows; i++) {
+	for (i = 0; i < rows; i++) {
 		glimma.layout.setupRow(selection, sizes, type);
 	}
 };
 
 glimma.rangeSpan = function(interval, step) {
-	if (step != 0) {
+	if (step !== 0) {
 		var lower = step * Math.ceil(interval[0]/step),
 			upper = step * Math.floor(interval[1]/step);
 
@@ -56604,8 +56606,12 @@ glimma.rangeSpan = function(interval, step) {
 			nextval += step;
 		}
 
-		return output
+		return output;
 	}
-	return -1
+	return -1;
+};
+
+glimma.makeNames = function(str) {
+	return str.replace(/[^0-9a-zA-Z_]/g, ".").replace(/^[0-9]/, "X$&");
 };
 },{}]},{},[29]);

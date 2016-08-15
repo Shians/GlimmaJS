@@ -91,7 +91,7 @@ glimma.init.processLinkages = function () {
 				if (dest === "xChange") {
 					if (src === "click") {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
-							var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+							var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 							glimma.storage.charts[to].x(function (d) { return d[updateKey]; })
 														.title(String(d[key]))
@@ -102,7 +102,7 @@ glimma.init.processLinkages = function () {
 					} else {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 							if (!glimma.storage.charts[from].holdTooltip()) {
-								var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+								var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 								glimma.storage.charts[to].x(function (d) { return d[updateKey]; })
 															.title(String(d[key]))
@@ -115,7 +115,7 @@ glimma.init.processLinkages = function () {
 				} else if (dest === "yChange") {
 					if (src === "click") {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
-							var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+							var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 							glimma.storage.charts[to].y(function (d) { return d[updateKey]; })
 														.title(String(d[key]))
@@ -126,7 +126,7 @@ glimma.init.processLinkages = function () {
 					} else {
 						glimma.storage.charts[from].on(src + ".chart" + from, function (d) {
 							if (!glimma.storage.charts[from].holdTooltip()) {
-								var updateKey = (/^[0-9].*$/.test(d[key])) ? "X" + String(d[key]) : d[key]; // Append X if starts with number
+								var updateKey = glimma.makeNames(d[key]); // Append X if starts with number
 
 								glimma.storage.charts[to].y(function (d) { return d[updateKey]; })
 															.title(String(d[key]))
