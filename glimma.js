@@ -56612,6 +56612,8 @@ glimma.rangeSpan = function(interval, step) {
 };
 
 glimma.makeNames = function(str) {
-	return str.replace(/[^0-9a-zA-Z_]/g, ".").replace(/^[0-9]/, "X$&");
+	output = String(str).replace(/[^0-9a-zA-Z_]/g, ".").replace(/^[0-9]/, "X$&");
+
+	return output;
 };
 },{}]},{},[29]);
