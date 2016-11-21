@@ -207,13 +207,18 @@ glimma.chart.scatterChart = function() {
 		function drawPoints() {
 			var cirContainer;
 			if (typeof idValue(data[0]) !== "undefined") {
-				 cirContainer = svg.select(".circle-container")
-										.selectAll("circle")
-										.data(data, function(d) { return idValue(d); });
+				cirContainer = svg.select(".circle-container")
+									.selectAll("circle")
+									.data(data, function(d) { return idValue(d); });
 			} else {
-				 cirContainer = svg.select(".circle-container")
-										.selectAll("circle")
-										.data(data, function(d) { return [xValue(d), yValue(d)]; });
+
+				cirContainer = svg.select(".circle-container")
+									.selectAll("circle")
+									.data(data, function(d) {
+										var xval = glimma.math.signif(xValue(d), 3),
+											yval = glimma.math.signif(yValue(d), 3);
+										return [xval, yval];
+									});
 			}
 
 			// Remove data points that no longer exist
@@ -584,7 +589,8 @@ glimma.chart.scatterChart = function() {
 		factor = typeof factor !== "undefined" ? factor : 0.02;
 		extent = d3.extent(data, key);
 		range = extent[1] - extent[0];
-		offset = range * factor;
+		offset = (range == 0) ? extent[0] * factor : range * factor;
+
 		return [extent[0] - offset, extent[1] + offset];
 	}
 
