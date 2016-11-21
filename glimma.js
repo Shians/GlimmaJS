@@ -55215,7 +55215,7 @@ glimma.chart.scatterChart = function() {
 		ndigits = null,
 		xValue = function (d) { return d.x; },
 		yValue = function (d) { return d.y; },
-		idValue = function (d) { return d.id; },
+		idValue = function (d) { return d._uid; },
 		searchValue = function (d) {return d.search; },
 		idMap = function (d) { return d; },
 		sizeValue = function () { return 2; }, //TODO: Maybe add size scale?
@@ -56106,7 +56106,7 @@ glimma.math.round = function(n, digits) {
 
 	n = +n;
 	digits = +digits;
-	
+
 	if (isNaN(n) || !(typeof digits === "number" && digits % 1 === 0)) {
 		return NaN;
 	}
@@ -56119,12 +56119,8 @@ glimma.math.signif = function(n, digits) {
 
 	n = +n;
 	digits = +digits;
-	
+
 	if (isNaN(n) || !(typeof digits === "number" && digits % 1 === 0) || digits <= 0) {
-		console.log(digits);
-		console.log(typeof digits);
-		console.log(n);
-		console.log(typeof n);
 		return NaN;
 	}
 
@@ -56185,10 +56181,7 @@ glimma.init.processCharts = function() {
 		for (var i = 0; i < glimma.storage.chartInfo.length; i++) {
 			var chartInfo = glimma.storage.chartInfo[i];
 
-			glimma.storage.chartData[i] = glimma.storage.chartData[i].map(function (d, i) {
-				d._uid = i;
-				return d;
-			});
+			glimma.storage.chartData[i] = glimma.storage.chartData[i].map(addUID);
 
 			// MD Plot initialisation
 			if (chartInfo.flag === "mdplot") {
@@ -56203,6 +56196,11 @@ glimma.init.processCharts = function() {
 				glimma.storage.charts[i].hide();
 			}
 		}
+	}
+
+	function addUID(d, i) {
+		d._uid = i;
+		return d;
 	}
 
 	function processDefault(i) {

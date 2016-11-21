@@ -4,10 +4,7 @@ glimma.init.processCharts = function() {
 		for (var i = 0; i < glimma.storage.chartInfo.length; i++) {
 			var chartInfo = glimma.storage.chartInfo[i];
 
-			glimma.storage.chartData[i] = glimma.storage.chartData[i].map(function (d, i) {
-				d._uid = i;
-				return d;
-			});
+			glimma.storage.chartData[i] = glimma.storage.chartData[i].map(addUID);
 
 			// MD Plot initialisation
 			if (chartInfo.flag === "mdplot") {
@@ -22,6 +19,11 @@ glimma.init.processCharts = function() {
 				glimma.storage.charts[i].hide();
 			}
 		}
+	}
+
+	function addUID(d, i) {
+		d._uid = i;
+		return d;
 	}
 
 	function processDefault(i) {

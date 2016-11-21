@@ -5,7 +5,7 @@ glimma.math.round = function(n, digits) {
 
 	n = +n;
 	digits = +digits;
-	
+
 	if (isNaN(n) || !(typeof digits === "number" && digits % 1 === 0)) {
 		return NaN;
 	}
@@ -18,12 +18,8 @@ glimma.math.signif = function(n, digits) {
 
 	n = +n;
 	digits = +digits;
-	
+
 	if (isNaN(n) || !(typeof digits === "number" && digits % 1 === 0) || digits <= 0) {
-		console.log(digits);
-		console.log(typeof digits);
-		console.log(n);
-		console.log(typeof n);
 		return NaN;
 	}
 
