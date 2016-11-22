@@ -55,14 +55,26 @@ svg.plot-svg
     margin: auto;
 }
 
+.front
+{
+    pointer-events: none;
+}
+
 .green
 {
     fill: green;
 }
 
-.front
+.grid .tick
 {
-    pointer-events: none;
+    opacity: .7;
+
+    stroke: lightgrey;
+}
+
+.grid path
+{
+    stroke-width: 0;
 }
 
 .left-align
@@ -79,7 +91,6 @@ svg.plot-svg
 {
     text-align: center;
 }
-
 
 .tooltip-cell
 {
@@ -109,6 +120,8 @@ svg.plot-svg
 {
     font: 22px sans-serif;
     font-weight: bold;
+
+    margin: auto;
 
     pointer-events: none;
 }
@@ -151,4 +164,9 @@ svg.plot-svg
     font-size: 1em;
 
     background: #fff;
+}
+
+.clickable
+{
+    cursor: pointer;
 }

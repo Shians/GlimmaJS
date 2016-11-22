@@ -16,7 +16,7 @@ glimma.layout.bsAddRow = function(selection) {
  */
 glimma.layout.bsAddCol = function(selection, size, type) {
 	if (typeof type === "undefined") {
-		var type = "md";
+		type = "md";
 	}
 	var col = selection.append("div").attr("class", "col-" + type + "-" + size);
 	return col;
@@ -40,7 +40,7 @@ glimma.layout.addPlottableWindow = function(selection) {
  */
 glimma.layout.setupRow = function(selection, sizes, type) {
 	if (typeof type === "undefined") {
-		var type = "md";
+		type = "md";
 	}
 	var arrSum = function (array) {
 		return array.reduce(function (a, b) { return a + b; });
@@ -58,6 +58,8 @@ glimma.layout.setupRow = function(selection, sizes, type) {
 };
 
 glimma.layout.setupGrid = function(selection, type, dim) {
+	var i;
+
 	var rows = +dim[0],
 		cols = +dim[1],
 		size = Math.floor(12 / cols),
@@ -67,11 +69,35 @@ glimma.layout.setupGrid = function(selection, type, dim) {
 		return null;
 	}
 
-	for (var i = 0; i < cols; i++) {
+	for (i = 0; i < cols; i++) {
 		sizes.push(size);
 	}
 
-	for (var i = 0; i < rows; i++) {
+	for (i = 0; i < rows; i++) {
 		glimma.layout.setupRow(selection, sizes, type);
 	}
+};
+
+glimma.rangeSpan = function(interval, step) {
+	if (step !== 0) {
+		var lower = step * Math.ceil(interval[0]/step),
+			upper = step * Math.floor(interval[1]/step);
+
+		output = [];
+
+		var nextval = lower;
+		while (nextval <= upper) {
+			output.push(nextval);
+			nextval += step;
+		}
+
+		return output;
+	}
+	return -1;
+};
+
+glimma.makeNames = function(str) {
+	output = String(str).replace(/[^0-9a-zA-Z_]/g, ".").replace(/^[0-9]/, "X$&");
+
+	return output;
 };

@@ -4,7 +4,7 @@ window.glimma = {
 		chartInfo: [],
 		charts: [],
 		linkage: [],
-		input: []		
+		input: [],
+		tables: []
 	}
 };
-

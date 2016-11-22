@@ -241,12 +241,11 @@ glimma.chart.barChart = function() {
 
 	//* Internal Functions *//
 	function _highlight(data) {
-		_showTooltip(data);
+		
 	}
 
 	function _lowlight() {
-		container.select(".tooltip")
-					.style("opacity", 0);
+		
 	}
 
 	//* Helper Functions *//
@@ -267,14 +266,14 @@ glimma.chart.barChart = function() {
 			tooltip.html(glimma.math.round(yValue(data), ndigits));
 		}
 
-		var ttWidth = tooltip.node().offsetWidth,
-			ttHeight = tooltip.node().offsetHeight,
+		var ttWidth = $(tooltip.node()).outerWidth(),
+			ttHeight = $(tooltip.node()).outerHeight(),
 			floatOffset = 3;
 
-		var tooltipTop = yScale(yValue(data)) + container.select("svg").node().offsetTop;
+		var tooltipTop = yScale(yValue(data)) + $(container.select("svg").node()).offset().top;
 		tooltipTop += margin.top - ttHeight - floatOffset;
 
-		var tooltipLeft = xScale(nValue(data)) + container.select("svg").node().offsetLeft;
+		var tooltipLeft = xScale(nValue(data)) + $(container.select("svg").node()).offset().left;
 		tooltipLeft += margin.left + (xScale.rangeBand() - ttWidth) / 2;
 
 		// TODO, Top positioning might be unreliable.
@@ -287,6 +286,10 @@ glimma.chart.barChart = function() {
 	function _hideTooltip() {
 		container.select(".tooltip")
 					.style("opacity", 0);
+	}
+
+	function _colourise(name, col) {
+		container.selectAll(".bar")
 	}
 
 	//* Public Interactions *//
