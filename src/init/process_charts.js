@@ -27,9 +27,9 @@ glimma.init.processCharts = function() {
 	}
 
 	function processDefault(i) {
-		d3.select(".glimma-plot.available")
-					.datum(glimma.storage.chartData[i])
-					.call(glimma.storage.charts[i]);
+		var chart = glimma.storage.charts[i],
+			chartInfo = glimma.storage.chartInfo[i],
+			chartData = glimma.storage.chartData[i];
 
 		if (chartInfo.disableClick) {
 			chart.on("click", null);
@@ -42,11 +42,14 @@ glimma.init.processCharts = function() {
 		if (chartInfo.disableZoom) {
 			chart.enableBrush(false);
 		}
+
+		d3.select(".glimma-plot.available")
+			.datum(chartData)
+			.call(chart);
 	}
 
 	function processMD(i) {
-		var temp = function (d) { return d.col; };
-		glimma.storage.charts[i].col(temp)
+		glimma.storage.charts[i].col(function (d) { return d.col; })
 								.fixedCol(true);
 
 		processDefault(i);

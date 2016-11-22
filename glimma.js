@@ -56204,9 +56204,12 @@ glimma.init.processCharts = function() {
 	}
 
 	function processDefault(i) {
+		var chart = glimma.storage.charts[i],
+			chartInfo = glimma.storage.chartInfo[i];
+
 		d3.select(".glimma-plot.available")
-					.datum(glimma.storage.chartData[i])
-					.call(glimma.storage.charts[i]);
+						.datum(glimma.storage.chartData[i])
+						.call(chart);
 
 		if (chartInfo.disableClick) {
 			chart.on("click", null);
