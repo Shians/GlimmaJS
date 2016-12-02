@@ -25,6 +25,11 @@ g.tick
     font-size: 11px;
 }
 
+div.container
+{
+    margin-top: 20px;
+}
+
 div.padded
 {
     padding: 2px;
@@ -169,4 +174,12 @@ svg.plot-svg
 .clickable
 {
     cursor: pointer;
+}
+
+rect.active {
+
+}
+
+rect.inactive {
+
 }
