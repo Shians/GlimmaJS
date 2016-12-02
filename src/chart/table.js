@@ -4,9 +4,13 @@
  */
 glimma.chart.table = function() {
 	var tableData = {
-					table: "display",
+					deferRender: true,
 					select: { style: "single" },
-					pagingType: "full_numbers"
+					info: false,
+					scrollY: 400,
+					lengthChange: false,
+					scrollCollapse: true,
+			        scroller: true
 				},
 		dispatcher = d3.dispatch("click");
 
@@ -21,6 +25,7 @@ glimma.chart.table = function() {
 
 		selection.classed("available", false);
 
+		d3.select("div.dataTables_paginate").remove();
 		return tab;
 	}
 
@@ -50,6 +55,21 @@ glimma.chart.table = function() {
 
 	table.click = function() {
 		dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
+	};
+
+	table.highlightById = function(d) {
+		var uid = d._uid;
+
+		table.selectById(uid);
+		table.scrollTo(uid);
+	};
+
+	table.scrollTo = function(uid) {
+		tab.row(uid).scrollTo();
+	};
+
+	table.selectById = function(uid) {
+		tab.row(uid).select();
 	};
 
 	d3.rebind(table, dispatcher, "on");
