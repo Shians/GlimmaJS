@@ -65,7 +65,7 @@ glimma.chart.barChart = function() {
 			}
 		}
 
-		function bindData() {   
+		function bindData() {
 			// Bind data to SVG if it exists
 			svg = selection.selectAll("svg").data([data]);
 		}
@@ -96,7 +96,7 @@ glimma.chart.barChart = function() {
 			var barContainer = svg.select(".bar-container")
 									.selectAll("rect")
 									.data(data, nValue);
-		
+
 			// Remove data bars that no longer exist
 			barContainer.exit()
 						.remove();
@@ -109,7 +109,7 @@ glimma.chart.barChart = function() {
 						.attr("y", function (d) { return yScale(yValue(d)); })
 						.attr("height", function (d) { return height - margin.top - margin.bottom - yScale(yValue(d)); })
 						.attr("width", xScale.rangeBand())
-						.style("fill", "steelblue")
+						.style("fill", "#2780e3")
 						.on("click", function (d) { dispatcher.click(d); })
 						.on("mouseover", function (d) { dispatcher.hover(d); })
 						.on("mouseout", function (d) { dispatcher.leave(d); });
@@ -120,7 +120,7 @@ glimma.chart.barChart = function() {
 						.attr("y", function (d) { return yScale(yValue(d)); })
 						.attr("height", function (d) { return height - margin.top - margin.bottom - yScale(yValue(d)); });
 		}
-		
+
 		function drawAxis() {
 			var tallTextOffset = 6;
 
@@ -157,11 +157,9 @@ glimma.chart.barChart = function() {
 
 		function bindDispatcher() {
 			// Assign dispatcher events
-			dispatcher.on("hover", function (d) { chart.highlight(d); });
-			dispatcher.on("leave", function (d) { chart.lowlight(d); });
 		}
 	}
-	
+
 	//* Setters/getters *//
 	chart.margin = function(_) {
 		if (!arguments.length) return margin;
@@ -240,12 +238,26 @@ glimma.chart.barChart = function() {
 	};
 
 	//* Internal Functions *//
-	function _highlight(data) {
-		
+	function _highlight(barNum) {
+		container.selectAll("rect.bar")
+					.filter(function (d, i) { return (i + 1) == barNum; })
+					.style("fill", "#2780e3");
 	}
 
-	function _lowlight() {
-		
+	function _highlightAll() {
+		container.selectAll("rect.bar")
+					.style("fill", "#2780e3");
+	}
+
+	function _lowlight(barNum) {
+		container.selectAll("rect.bar")
+					.filter(function (d, i) { return (i + 1) == barNum; })
+					.style("fill", "#8ebcf0");
+	}
+
+	function _lowlightAll() {
+		container.selectAll("rect.bar")
+					.style("fill", "#8ebcf0");
 	}
 
 	//* Helper Functions *//
@@ -293,30 +305,38 @@ glimma.chart.barChart = function() {
 	}
 
 	//* Public Interactions *//
-	chart.highlight = function (d) {
-		_highlight(d);
+	chart.highlightBar = function(barNum) {
+		_highlight(barNum);
 	};
 
-	chart.lowlight = function (d) {
-		_lowlight();
+	chart.highlightAll = function() {
+		_highlightAll();
 	};
 
-	chart.update = function () {
+	chart.lowlightBar = function(barNum) {
+		_lowlight(barNum);
+	};
+
+	chart.lowlightAll = function() {
+		_lowlightAll();
+	};
+
+	chart.update = function() {
 		container.call(chart);
 		return chart;
 	};
 
-	chart.hide = function () {
+	chart.hide = function() {
 		container.style("display", "none");
 		return chart;
 	};
 
-	chart.show = function () {
+	chart.show = function() {
 		container.style("display", "block");
 		return chart;
 	};
 
 	d3.rebind(chart, dispatcher, "on");
-	
+
 	return chart;
 };
