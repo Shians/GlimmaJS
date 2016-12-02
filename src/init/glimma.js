@@ -6,5 +6,9 @@ window.glimma = {
 		linkage: [],
 		input: [],
 		tables: []
+	},
+	debug: {
+		charts: [],
+		tables: []
 	}
 };

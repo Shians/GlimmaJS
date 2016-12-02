@@ -665,9 +665,9 @@ glimma.chart.scatterChart = function() {
 
 		c.attr("cx", data.xJitter + xScale(xValue(data)))
 			.attr("cy", data.yJitter + yScale(yValue(data)))
-			.attr("r", sizeValue(data) + 2)
+			.attr("r", sizeValue(data) + 4)
 			.style("opacity", 1)
-			.style("stroke", "white")
+			.style("stroke", "black")
 			.style("fill", cScale(cValue(data)));
 	}
 
@@ -742,8 +742,6 @@ glimma.chart.scatterChart = function() {
 		if (selectedData.length !== 0) {
 			_deselect();
 			dispatcher.hover(selectedData[0]);
-		} else {
-			console.log("Not found");
 		}
 		return chart;
 	};
@@ -756,8 +754,6 @@ glimma.chart.scatterChart = function() {
 		if (selectedData.length !== 0) {
 			_deselect();
 			dispatcher.hover(selectedData[0]);
-		} else {
-			console.log("Not found");
 		}
 		return chart;
 	};

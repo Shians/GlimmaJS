@@ -2,21 +2,28 @@
 glimma.init.processCharts = function() {
 	if (d3.select(".glimma-plot.available").node()) {
 		for (var i = 0; i < glimma.storage.chartInfo.length; i++) {
-			var chartInfo = glimma.storage.chartInfo[i];
+			var chart = glimma.get.chart(i),
+				chartInfo = glimma.get.chartInfo(i),
+				chartData = glimma.get.chartData(i);
 
-			glimma.storage.chartData[i] = glimma.storage.chartData[i].map(addUID);
+			chartData = chartData.map(addUID);
+
+			var chartObj = {"chart": chart,
+							"chartInfo": chartInfo,
+							"chartData": chartData};
+
 
 			// MD Plot initialisation
 			if (chartInfo.flag === "mdplot") {
-				processMD(i);
+				processMD(chartObj);
 			// Default initialisation
 			} else {
-				processDefault(i);
+				processDefault(chartObj);
 			}
 
 			// Hide plots if required
 			if (chartInfo.hide) {
-				glimma.storage.charts[i].hide();
+				chart.hide();
 			}
 		}
 	}
@@ -26,10 +33,10 @@ glimma.init.processCharts = function() {
 		return d;
 	}
 
-	function processDefault(i) {
-		var chart = glimma.storage.charts[i],
-			chartInfo = glimma.storage.chartInfo[i],
-			chartData = glimma.storage.chartData[i];
+	function processDefault(chartObj) {
+		var chart = chartObj.chart,
+			chartInfo = chartObj.chartInfo,
+			chartData = chartObj.chartData;
 
 		if (chartInfo.disableClick) {
 			chart.on("click", null);
@@ -48,11 +55,13 @@ glimma.init.processCharts = function() {
 			.call(chart);
 	}
 
-	function processMD(i) {
-		glimma.storage.charts[i].col(function (d) { return d.col; })
-								.fixedCol(true);
+	function processMD(chartObj) {
+		var colGetter = function (d) { return d.col; };
 
-		processDefault(i);
+		chartObj.chart.col(colGetter)
+					  .fixedCol(true);
+
+		processDefault(chartObj);
 	}
 };
 
