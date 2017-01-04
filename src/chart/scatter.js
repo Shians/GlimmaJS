@@ -23,7 +23,8 @@ glimma.chart.scatterChart = function() {
 		yJitter = 0,
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
-		cScale = d3.scale.category10(),
+		cScale = d3.scale.ordinal().range(["#00bfff","#ff3030","#90ee90","#d15fee","#ffb90f",
+											"#ff00ff","#0000ff","#a9a9a9","#a0522d","#228b22"]),
 		cFixed = false,
 		colRefresh = false,
 		holdTooltip = false,
@@ -121,13 +122,19 @@ glimma.chart.scatterChart = function() {
 		function drawTitle() {
 			// Select title div if it exists, otherwise create it
 			var titleDiv = selection.select(".title");
+
 			if (titleDiv.node() === null) {
 				titleDiv = selection.append("div")
 										.attr("class", "title center-align")
-										.style("width", width + "px")
-										.html(titleValue);
+										.style("width", width + "px");
+			}
+
+			if (titleValue.length === 0) {
+				titleDiv.html("_")
+						.style("color", "white");
 			} else {
-				titleDiv.html(titleValue);
+				titleDiv.html(titleValue)
+						.style("color", "black");
 			}
 		}
 
@@ -493,7 +500,9 @@ glimma.chart.scatterChart = function() {
 		if (_) {
 			cScale = function (d) { return d; };
 		} else {
-			cScale = d3.scale.category10();
+			cScale = d3.scale.ordinal().range(
+				["#00bfff","#ff3030","#90ee90","#d15fee","#ffb90f",
+				"#ff00ff","#0000ff","#a9a9a9","#a0522d","#228b22"]);
 		}
 		return chart;
 	};
@@ -572,11 +581,11 @@ glimma.chart.scatterChart = function() {
 
 	chart._xScale = function() {
 		return xScale;
-	}
+	};
 
 	chart._yScale = function() {
 		return yScale;
-	}
+	};
 
 	//* Internal Functions *//
 	function _deselect() {
@@ -589,7 +598,7 @@ glimma.chart.scatterChart = function() {
 		factor = typeof factor !== "undefined" ? factor : 0.02;
 		extent = d3.extent(data, key);
 		range = extent[1] - extent[0];
-		offset = (range == 0) ? extent[0] * factor : range * factor;
+		offset = (range === 0) ? extent[0] * factor : range * factor;
 
 		return [extent[0] - offset, extent[1] + offset];
 	}
@@ -644,7 +653,7 @@ glimma.chart.scatterChart = function() {
 					.style("left", tooltipLeft + "px");
 
 		tooltipTop = data.yJitter + yScale(yValue(data));
-		tooltipTop += margin.top + $(container.select("svg").node()).offset().top;
+		tooltipTop += $(container.select("svg").node()).offset().top;
 		tooltipTop -= 3 + $(container.select(".tooltip").node()).outerHeight();
 		tooltipTop = tooltipTop < 0 ? 0 : tooltipTop;
 		container.select(".tooltip")
