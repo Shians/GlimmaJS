@@ -24,10 +24,11 @@ glimma.init.processLinkages = function () {
 			if (flag === "mds") {
 				glimma.get.chart(srcChart).container.selectAll("rect.bar").classed("clickable", true);
 				glimma.get.chart(srcChart).lowlightAll();
-				glimma.get.chart(srcChart).highlightBar(1);
-				glimma.get.chart(srcChart).highlightBar(2);
+				glimma.get.chart(srcChart).highlightBar([1, 2]);
 
 				glimma.get.chart(srcChart).on("click.mds", updateDimensions);
+				glimma.get.chart(srcChart).on("hover.mds", highlightDimensions);
+				glimma.get.chart(srcChart).on("leave.mds", resetBarHighlights);
 
 				var groupNames = glimma.storage.chartInfo[0].info.groupsNames;
 
@@ -114,8 +115,14 @@ glimma.init.processLinkages = function () {
 				var maxDim = glimma.get.chartInfo(srcChart).info.dims;
 
 				if (withinMDSBound(d.name, maxDim)) {
-					var firstDimVal = d.name;
-					var secondDimVal = d.name + 1;
+					if (d.name !== Math.min(maxDim, 8)) {
+						var firstDimVal = d.name;
+						var secondDimVal = d.name + 1;
+					} else {
+						var firstDimVal = d.name - 1;
+						var secondDimVal = d.name;
+					}
+
 					(function () {
 						var firstDimKey = "dim" + firstDimVal;
 						var firstDimLabel = "Dimension " + firstDimVal;
@@ -126,8 +133,7 @@ glimma.init.processLinkages = function () {
 						var old = glimma.storage.charts[destChart].tooltip().slice(0, -2);
 
 						glimma.get.chart(srcChart).lowlightAll();
-						glimma.get.chart(srcChart).highlightBar(firstDimVal);
-						glimma.get.chart(srcChart).highlightBar(secondDimVal);
+						glimma.get.chart(srcChart).highlightBar([firstDimVal, secondDimVal]);
 
 						glimma.storage.charts[destChart]
 								.x(function (d) { return d[firstDimKey]; })
@@ -138,13 +144,32 @@ glimma.init.processLinkages = function () {
 					}());
 					glimma.storage.charts[destChart].refresh();
 				}
+			}
 
-				function withinMDSBound(dim, maxDim) {
-					dim = Number(dim);
-					var upperBound  = Math.min(8, maxDim);
+			function highlightDimensions(d) {
+				var maxDim = glimma.get.chartInfo(srcChart).info.dims;
 
-					return dim < upperBound;
+				if (d.name !== Math.min(maxDim, 8)) {
+					var firstDimVal = d.name;
+					var secondDimVal = d.name + 1;
+				} else {
+					var firstDimVal = d.name - 1;
+					var secondDimVal = d.name;
 				}
+
+				glimma.get.chart(srcChart).lowlightAll();
+				glimma.get.chart(srcChart).softHighlightBar([firstDimVal, secondDimVal]);
+			}
+
+			function resetBarHighlights() {
+				glimma.get.chart(srcChart).resetHighlightBar();
+			}
+
+			function withinMDSBound(dim, maxDim) {
+				dim = Number(dim);
+				var upperBound  = Math.min(maxDim, 8);
+
+				return dim <= upperBound;
 			}
 
 			function drawMultiGroups(groupNames) {
