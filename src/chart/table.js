@@ -4,13 +4,15 @@
  */
 glimma.chart.table = function() {
 	var tableData = {
-					deferRender: true,
-					select: { style: "single" },
-					info: false,
-					scrollY: 400,
-					lengthChange: false,
-					scrollCollapse: true,
-			        scroller: true
+					"deferRender": true,
+					"scrollY": 400,
+					"lengthChange": false,
+					"scrollCollapse": true,
+			        "scroller": true,
+			        "select": {
+			        	"style": "single",
+			        	"info": false
+			        }
 				},
 		dispatcher = d3.dispatch("click");
 
