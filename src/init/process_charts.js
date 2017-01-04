@@ -56,7 +56,7 @@ glimma.init.processCharts = function() {
 	}
 
 	function processMD(chartObj) {
-		var colGetter = function (d) { return d.col; };
+		var colGetter = function (d) { return d.cols; };
 
 		chartObj.chart.col(colGetter)
 					  .fixedCol(true);

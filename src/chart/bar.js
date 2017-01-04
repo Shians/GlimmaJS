@@ -18,7 +18,8 @@ glimma.chart.barChart = function() {
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
-		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
+		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0),
+		highlightedBars = [];
 
 	var dispatcher = d3.dispatch("hover", "leave", "click"),
 		container,
@@ -239,9 +240,30 @@ glimma.chart.barChart = function() {
 
 	//* Internal Functions *//
 	function _highlight(barNum) {
-		container.selectAll("rect.bar")
-					.filter(function (d, i) { return (i + 1) == barNum; })
+		if (typeof barNum === "number") {
+			barNum = [barNum];
+		}
+
+		highlightedBars = barNum;
+
+		_softHighlight(barNum);
+	}
+
+	function _softHighlight(barNum) {
+		if (typeof barNum === "number") {
+			barNum = [barNum];
+		}
+
+		for (var j = 0; j < barNum.length; j++) {
+			container.selectAll("rect.bar")
+					.filter(function (d, i) { return (i + 1) == barNum[j]; })
 					.style("fill", "#2780e3");
+		}
+	}
+
+	function _resetHighlight(barNum) {
+		_lowlightAll();
+		_softHighlight(highlightedBars);
 	}
 
 	function _highlightAll() {
@@ -309,8 +331,16 @@ glimma.chart.barChart = function() {
 		_highlight(barNum);
 	};
 
+	chart.softHighlightBar = function(barNum) {
+		_softHighlight(barNum);
+	};
+
 	chart.highlightAll = function() {
 		_highlightAll();
+	};
+
+	chart.resetHighlightBar = function() {
+		_resetHighlight();
 	};
 
 	chart.lowlightBar = function(barNum) {

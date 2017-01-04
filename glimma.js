@@ -73402,7 +73402,8 @@ glimma.chart.barChart = function() {
 		yScale = d3.scale.linear(),
 		cScale = d3.scale.category10(),
 		xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),
-		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0);
+		yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 0),
+		highlightedBars = [];
 
 	var dispatcher = d3.dispatch("hover", "leave", "click"),
 		container,
@@ -73623,9 +73624,30 @@ glimma.chart.barChart = function() {
 
 	//* Internal Functions *//
 	function _highlight(barNum) {
-		container.selectAll("rect.bar")
-					.filter(function (d, i) { return (i + 1) == barNum; })
+		if (typeof barNum === "number") {
+			barNum = [barNum];
+		}
+
+		highlightedBars = barNum;
+
+		_softHighlight(barNum);
+	}
+
+	function _softHighlight(barNum) {
+		if (typeof barNum === "number") {
+			barNum = [barNum];
+		}
+
+		for (var j = 0; j < barNum.length; j++) {
+			container.selectAll("rect.bar")
+					.filter(function (d, i) { return (i + 1) == barNum[j]; })
 					.style("fill", "#2780e3");
+		}
+	}
+
+	function _resetHighlight(barNum) {
+		_lowlightAll();
+		_softHighlight(highlightedBars);
 	}
 
 	function _highlightAll() {
@@ -73693,8 +73715,16 @@ glimma.chart.barChart = function() {
 		_highlight(barNum);
 	};
 
+	chart.softHighlightBar = function(barNum) {
+		_softHighlight(barNum);
+	};
+
 	chart.highlightAll = function() {
 		_highlightAll();
+	};
+
+	chart.resetHighlightBar = function() {
+		_resetHighlight();
 	};
 
 	chart.lowlightBar = function(barNum) {
@@ -73759,7 +73789,8 @@ glimma.chart.scatterChart = function() {
 		yJitter = 0,
 		xScale = d3.scale.linear(),
 		yScale = d3.scale.linear(),
-		cScale = d3.scale.category10(),
+		cScale = d3.scale.ordinal().range(["#00bfff","#ff3030","#90ee90","#d15fee","#ffb90f",
+											"#ff00ff","#0000ff","#a9a9a9","#a0522d","#228b22"]),
 		cFixed = false,
 		colRefresh = false,
 		holdTooltip = false,
@@ -73857,13 +73888,19 @@ glimma.chart.scatterChart = function() {
 		function drawTitle() {
 			// Select title div if it exists, otherwise create it
 			var titleDiv = selection.select(".title");
+
 			if (titleDiv.node() === null) {
 				titleDiv = selection.append("div")
 										.attr("class", "title center-align")
-										.style("width", width + "px")
-										.html(titleValue);
+										.style("width", width + "px");
+			}
+
+			if (titleValue.length === 0) {
+				titleDiv.html("_")
+						.style("color", "white");
 			} else {
-				titleDiv.html(titleValue);
+				titleDiv.html(titleValue)
+						.style("color", "black");
 			}
 		}
 
@@ -74229,7 +74266,9 @@ glimma.chart.scatterChart = function() {
 		if (_) {
 			cScale = function (d) { return d; };
 		} else {
-			cScale = d3.scale.category10();
+			cScale = d3.scale.ordinal().range(
+				["#00bfff","#ff3030","#90ee90","#d15fee","#ffb90f",
+				"#ff00ff","#0000ff","#a9a9a9","#a0522d","#228b22"]);
 		}
 		return chart;
 	};
@@ -74308,11 +74347,11 @@ glimma.chart.scatterChart = function() {
 
 	chart._xScale = function() {
 		return xScale;
-	}
+	};
 
 	chart._yScale = function() {
 		return yScale;
-	}
+	};
 
 	//* Internal Functions *//
 	function _deselect() {
@@ -74325,7 +74364,7 @@ glimma.chart.scatterChart = function() {
 		factor = typeof factor !== "undefined" ? factor : 0.02;
 		extent = d3.extent(data, key);
 		range = extent[1] - extent[0];
-		offset = (range == 0) ? extent[0] * factor : range * factor;
+		offset = (range === 0) ? extent[0] * factor : range * factor;
 
 		return [extent[0] - offset, extent[1] + offset];
 	}
@@ -74380,7 +74419,7 @@ glimma.chart.scatterChart = function() {
 					.style("left", tooltipLeft + "px");
 
 		tooltipTop = data.yJitter + yScale(yValue(data));
-		tooltipTop += margin.top + $(container.select("svg").node()).offset().top;
+		tooltipTop += $(container.select("svg").node()).offset().top;
 		tooltipTop -= 3 + $(container.select(".tooltip").node()).outerHeight();
 		tooltipTop = tooltipTop < 0 ? 0 : tooltipTop;
 		container.select(".tooltip")
@@ -74567,13 +74606,15 @@ glimma.chart.scatterChart = function() {
  */
 glimma.chart.table = function() {
 	var tableData = {
-					deferRender: true,
-					select: { style: "single" },
-					info: false,
-					scrollY: 400,
-					lengthChange: false,
-					scrollCollapse: true,
-			        scroller: true
+					"deferRender": true,
+					"scrollY": 400,
+					"lengthChange": false,
+					"scrollCollapse": true,
+			        "scroller": true,
+			        "select": {
+			        	"style": "single",
+			        	"info": false
+			        }
 				},
 		dispatcher = d3.dispatch("click");
 
@@ -74836,7 +74877,7 @@ glimma.init.processCharts = function() {
 	}
 
 	function processMD(chartObj) {
-		var colGetter = function (d) { return d.col; };
+		var colGetter = function (d) { return d.cols; };
 
 		chartObj.chart.col(colGetter)
 					  .fixedCol(true);
@@ -74891,10 +74932,11 @@ glimma.init.processLinkages = function () {
 			if (flag === "mds") {
 				glimma.get.chart(srcChart).container.selectAll("rect.bar").classed("clickable", true);
 				glimma.get.chart(srcChart).lowlightAll();
-				glimma.get.chart(srcChart).highlightBar(1);
-				glimma.get.chart(srcChart).highlightBar(2);
+				glimma.get.chart(srcChart).highlightBar([1, 2]);
 
 				glimma.get.chart(srcChart).on("click.mds", updateDimensions);
+				glimma.get.chart(srcChart).on("hover.mds", highlightDimensions);
+				glimma.get.chart(srcChart).on("leave.mds", resetBarHighlights);
 
 				var groupNames = glimma.storage.chartInfo[0].info.groupsNames;
 
@@ -74981,8 +75023,14 @@ glimma.init.processLinkages = function () {
 				var maxDim = glimma.get.chartInfo(srcChart).info.dims;
 
 				if (withinMDSBound(d.name, maxDim)) {
-					var firstDimVal = d.name;
-					var secondDimVal = d.name + 1;
+					if (d.name !== Math.min(maxDim, 8)) {
+						var firstDimVal = d.name;
+						var secondDimVal = d.name + 1;
+					} else {
+						var firstDimVal = d.name - 1;
+						var secondDimVal = d.name;
+					}
+
 					(function () {
 						var firstDimKey = "dim" + firstDimVal;
 						var firstDimLabel = "Dimension " + firstDimVal;
@@ -74993,8 +75041,7 @@ glimma.init.processLinkages = function () {
 						var old = glimma.storage.charts[destChart].tooltip().slice(0, -2);
 
 						glimma.get.chart(srcChart).lowlightAll();
-						glimma.get.chart(srcChart).highlightBar(firstDimVal);
-						glimma.get.chart(srcChart).highlightBar(secondDimVal);
+						glimma.get.chart(srcChart).highlightBar([firstDimVal, secondDimVal]);
 
 						glimma.storage.charts[destChart]
 								.x(function (d) { return d[firstDimKey]; })
@@ -75005,13 +75052,32 @@ glimma.init.processLinkages = function () {
 					}());
 					glimma.storage.charts[destChart].refresh();
 				}
+			}
 
-				function withinMDSBound(dim, maxDim) {
-					dim = Number(dim);
-					var upperBound  = Math.min(8, maxDim);
+			function highlightDimensions(d) {
+				var maxDim = glimma.get.chartInfo(srcChart).info.dims;
 
-					return dim < upperBound;
+				if (d.name !== Math.min(maxDim, 8)) {
+					var firstDimVal = d.name;
+					var secondDimVal = d.name + 1;
+				} else {
+					var firstDimVal = d.name - 1;
+					var secondDimVal = d.name;
 				}
+
+				glimma.get.chart(srcChart).lowlightAll();
+				glimma.get.chart(srcChart).softHighlightBar([firstDimVal, secondDimVal]);
+			}
+
+			function resetBarHighlights() {
+				glimma.get.chart(srcChart).resetHighlightBar();
+			}
+
+			function withinMDSBound(dim, maxDim) {
+				dim = Number(dim);
+				var upperBound  = Math.min(maxDim, 8);
+
+				return dim <= upperBound;
 			}
 
 			function drawMultiGroups(groupNames) {
