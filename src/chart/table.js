@@ -45,7 +45,7 @@ glimma.chart.table = function() {
 
 		var mapFun = function(d) {
 			if (d.search("\\." !== -1)) {
-				return {data: d.replace(".", "\\."), title: d};
+				return {data: d.replace(/[.]/g, "\\."), title: d};
 			} else {
 				return {data: d, title: d};
 			}
