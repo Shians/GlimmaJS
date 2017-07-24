@@ -235,6 +235,4 @@ glimma.init.processLinkages = function () {
 			}
 		}());
 	}
-
-
 };
