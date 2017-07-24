@@ -8,10 +8,11 @@ glimma.init.processCharts = function() {
 
 			chartData = chartData.map(addUID);
 
-			var chartObj = {"chart": chart,
-							"chartInfo": chartInfo,
-							"chartData": chartData};
-
+			var chartObj = {
+				"chart": chart,
+				"chartInfo": chartInfo,
+				"chartData": chartData
+			};
 
 			// MD Plot initialisation
 			if (chartInfo.flag === "mdplot") {

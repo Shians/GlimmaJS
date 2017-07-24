@@ -33,7 +33,7 @@ glimma.chart.table = function() {
 
 	// No internal actions required yet, highlighting handled by select addon for DataTables
 	// dispatcher.on("click", function (d) { table.click(d); });
-
+	
 	table.data = function(_) {
 		if (!arguments.length) return tableData.data;
 		tableData.data = _;
