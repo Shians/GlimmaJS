@@ -74682,6 +74682,25 @@ glimma.chart.table = function() {
 };
 
 },{}],30:[function(require,module,exports){
+glimma.transform = {};
+
+glimma.transform.toRowMajor = function(obj) {
+	var col_names = Object.keys(obj);
+	var n_row = obj[col_names[0]].length;
+
+	var row_range = _.range(n_row);
+	var output = _.map(row_range, function(i) {
+			var output = {};
+			for (var col_index = 0; col_index < col_names.length; col_index++) {
+				column = col_names[col_index];
+				output[column] = obj[column][i];
+			}
+			return output;
+		}
+	);
+	return output
+}
+},{}],31:[function(require,module,exports){
 glimma.get = {};
 
 glimma.get.chart = function(id) {
@@ -74731,11 +74750,12 @@ glimma.get.table = function(id) {
 
 	return table;
 }
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 require("./math.js");
 require("./methods.js");
 require("./get_chart.js");
-},{"./get_chart.js":30,"./math.js":32,"./methods.js":33}],32:[function(require,module,exports){
+require("./data_transform.js");
+},{"./data_transform.js":30,"./get_chart.js":31,"./math.js":33,"./methods.js":34}],33:[function(require,module,exports){
 glimma.math = {};
 
 glimma.math.round = function(n, digits) {
@@ -74763,7 +74783,7 @@ glimma.math.signif = function(n, digits) {
 
 	return +n.toPrecision(digits);
 };
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 //* REQUIRES D3 *//
 // Method to get unique elements of array.
 if (typeof d3 !== "undefined") {
@@ -74774,7 +74794,7 @@ if (typeof d3 !== "undefined") {
 	}
 }
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 window.jQuery = require("jquery");
 window.$ = window.jQuery;
 window.d3 = require("d3");
@@ -74792,7 +74812,7 @@ require("./init/index");
 require("./helper/index");
 require("./chart/index");
 require("./layout/index");
-},{"./chart/index":27,"./helper/index":31,"./init/index":36,"./layout/index":43,"bootstrap":1,"d3":14,"datatables.net":19,"datatables.net-scroller":15,"datatables.net-select":16,"jquery":22,"jquery-ui":21,"tether":23,"underscore":24}],35:[function(require,module,exports){
+},{"./chart/index":27,"./helper/index":32,"./init/index":37,"./layout/index":45,"bootstrap":1,"d3":14,"datatables.net":19,"datatables.net-scroller":15,"datatables.net-select":16,"jquery":22,"jquery-ui":21,"tether":23,"underscore":24}],36:[function(require,module,exports){
 window.glimma = {
 	storage: {
 		chartData: [],
@@ -74808,7 +74828,7 @@ window.glimma = {
 	}
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 require("./glimma");
 require("./init");
 
@@ -74816,9 +74836,10 @@ require("./process_charts");
 require("./process_linkage");
 require("./process_inputs");
 require("./process_tables");
-},{"./glimma":35,"./init":37,"./process_charts":38,"./process_inputs":39,"./process_linkage":40,"./process_tables":41}],37:[function(require,module,exports){
+require("./transform_data");
+},{"./glimma":36,"./init":38,"./process_charts":39,"./process_inputs":40,"./process_linkage":41,"./process_tables":42,"./transform_data":43}],38:[function(require,module,exports){
 window.glimma.init = {};
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 // Cycle through constructed plots
 glimma.init.processCharts = function() {
 	if (d3.select(".glimma-plot.available").node()) {
@@ -74887,7 +74908,7 @@ glimma.init.processCharts = function() {
 };
 
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 // Function to process the inputs at initialisation
 
 glimma.init.processInputs = function () {
@@ -74905,7 +74926,7 @@ glimma.init.processInputs = function () {
 		}());
 	}
 };
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 // Function to process the action linkages between charts
 
 glimma.init.processLinkages = function () {
@@ -75143,11 +75164,9 @@ glimma.init.processLinkages = function () {
 			}
 		}());
 	}
-
-
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 // Function to process the inputs at initialisation
 
 glimma.init.processTables = function () {
@@ -75178,7 +75197,14 @@ glimma.init.processTables = function () {
 
 	}
 };
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
+glimma.init.transformData = function() {
+	for (var i = 0; i < glimma.storage.chartData.length; i++) {
+		glimma.storage.chartData[i] = glimma.transform.toRowMajor(glimma.storage.chartData[i]);
+	}
+}
+
+},{}],44:[function(require,module,exports){
 /**
  * Create an input button with 
  * @return {Object}
@@ -75227,15 +75253,15 @@ glimma.layout.addAutoInput = function(selection, options, float) {
 
 	return addButton(row, options);
 };
-},{}],43:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 require("./layout");
 
 require("./utilities");
 require("./autoinput");
 require("./table");
-},{"./autoinput":42,"./layout":44,"./table":45,"./utilities":46}],44:[function(require,module,exports){
+},{"./autoinput":44,"./layout":46,"./table":47,"./utilities":48}],46:[function(require,module,exports){
 glimma.layout = {};
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 //* REQUIRES DATATABLE.JS LIBRARY *//
 /**
  * @param  {selection} selection d3 selection to add row to.
@@ -75250,7 +75276,7 @@ glimma.layout.addTable = function(selection) {
 							.style("width", "100%");
 	return table;
 };
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 //* REQUIRES BOOTSTRAP.JS LIBRARY *//
 /**
  * @param  {selection} selection d3 selection to add row to.
@@ -75354,4 +75380,4 @@ glimma.makeNames = function(str) {
 
 	return output;
 };
-},{}]},{},[34]);
+},{}]},{},[35]);
