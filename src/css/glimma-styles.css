@@ -176,10 +176,16 @@ svg.plot-svg
     cursor: pointer;
 }
 
-rect.active {
-
+tr.even
+{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-rect.inactive {
-
+tr.odd
+{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
