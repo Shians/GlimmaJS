@@ -175,17 +175,3 @@ svg.plot-svg
 {
     cursor: pointer;
 }
-
-tr.even
-{
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-tr.odd
-{
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
