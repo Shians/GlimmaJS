@@ -77,6 +77,9 @@ glimma.chart.scatterChart = function() {
 
 		bindDispatcher();
 
+		// add event for 'esc' key for deselection
+		d3.select("body").on("keydown.scatter", d => { if (d3.event.keyCode == 27) _deselect() });
+
 		function addJitter() {
 			selection.data()[0] = selection.data()[0].map(function(d) {
 				d.xJitter = (Math.random() - 0.5) * xJitter;
