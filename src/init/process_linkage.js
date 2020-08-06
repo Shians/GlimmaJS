@@ -47,7 +47,7 @@ glimma.init.processLinkages = function () {
 
 							glimma.storage.charts[destChart].x(function (d) { return d[updateKey]; })
 														.title(String(d[key]))
-														.tooltip(["Sample", updateKey])
+														.tooltip(["Sample", "Group", updateKey])
 														.refresh()
 														.show();
 						});
@@ -58,7 +58,7 @@ glimma.init.processLinkages = function () {
 
 								glimma.storage.charts[destChart].x(function (d) { return d[updateKey]; })
 															.title(String(d[key]))
-															.tooltip(["Sample", updateKey])
+															.tooltip(["Sample", "Group", updateKey])
 															.refresh()
 															.show();
 							}
@@ -71,7 +71,7 @@ glimma.init.processLinkages = function () {
 
 							glimma.storage.charts[destChart].y(function (d) { return d[updateKey]; })
 														.title(String(d[key]))
-														.tooltip(["Sample", updateKey])
+														.tooltip(["Sample", "Group", updateKey])
 														.refresh()
 														.show();
 						});
@@ -82,7 +82,7 @@ glimma.init.processLinkages = function () {
 
 								glimma.storage.charts[destChart].y(function (d) { return d[updateKey]; })
 															.title(String(d[key]))
-															.tooltip(["Sample", updateKey])
+															.tooltip(["Sample", "Group", updateKey])
 															.refresh()
 															.show();
 							}

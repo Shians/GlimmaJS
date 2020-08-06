@@ -22,7 +22,11 @@ glimma.chart.table = function() {
 		tab = $(selection.node()).DataTable(tableData);
 
 		tab.on("click", function (e, dt, type, indexes) {
-			dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
+			glimma.log("Table clicked");
+			setTimeout(function() {
+				dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
+			}, 50);
+			
 		});
 
 		selection.classed("available", false);
@@ -56,14 +60,15 @@ glimma.chart.table = function() {
 	};
 
 	table.click = function() {
-		dispatcher.click(tab.rows({selected: true}).data().pluck("_uid").toArray()[0]);
+		var selectedId = tab.rows({selected: true}).data().pluck("_uid").toArray()[0];
+		dispatcher.click(selectedId);
 	};
 
 	table.highlightById = function(d) {
 		var uid = d._uid;
 
-		table.selectById(uid);
 		table.scrollTo(uid);
+		table.selectById(uid);
 	};
 
 	table.scrollTo = function(uid) {

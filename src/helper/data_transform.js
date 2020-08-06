@@ -3,7 +3,7 @@ glimma.transform = {};
 glimma.transform.toRowMajor = function(obj) {
 	var col_names = Object.keys(obj);
 	var n_row = obj[col_names[0]].length;
-
+	
 	var row_range = _.range(n_row);
 	var output = _.map(row_range, function(i) {
 			var output = {};

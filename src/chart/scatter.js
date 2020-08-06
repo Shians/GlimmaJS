@@ -78,7 +78,7 @@ glimma.chart.scatterChart = function() {
 		bindDispatcher();
 
 		// add event for 'esc' key for deselection
-		d3.select("body").on("keydown.scatter", d => { if (d3.event.keyCode == 27) _deselect() });
+		d3.select("body").on("keydown.scatter", function(d) { if (d3.event.keyCode == 27) _deselect() });
 
 		function addJitter() {
 			selection.data()[0] = selection.data()[0].map(function(d) {
@@ -309,14 +309,14 @@ glimma.chart.scatterChart = function() {
 			if (yGridOn) {
 				if (yGridStep !== null) {
 					svg.select(".y.grid")
-					   .call(yGrid
+						.call(yGrid
 							.tickValues(glimma.rangeSpan(yGrid.scale().domain(), yGridStep))
 							.tickSize(-(width - margin.right - margin.left), 0, 0)
 							.tickFormat("")
 						);
 				} else {
 					svg.select(".y.grid")
-					   .call(yGrid
+						.call(yGrid
 							.tickSize(-(width - margin.right - margin.left), 0, 0)
 							.tickFormat("")
 						);

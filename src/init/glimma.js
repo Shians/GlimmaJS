@@ -9,6 +9,12 @@ window.glimma = {
 	},
 	debug: {
 		charts: [],
-		tables: []
+		tables: [],
+		log: false
+	},
+	log: function(x) {
+		if (glimma.debug.log) {
+			console.log(x);
+		}
 	}
 };
